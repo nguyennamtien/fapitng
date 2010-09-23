@@ -4,10 +4,9 @@ TO DO
 * Form caching.
 * Process attached files.
 * Batch API integration?
-* Validate elements with predefined options.
+* Validate elements with predefined options (select, radio(s) and checkbox(es))
 * Study (and implement parts of?) http://drupal.org/node/165104 and http://www.gliffy.com/pubdoc/1508856/L.png.
 * Make multi-step forms as easy to handle as possible.
-* What if we let FAPI work with data type elements first, and render them into actual input types depending on the output? E.g. a certain element needs to be text or an integer. In a later stage it needs to be decided if a text element is rendered as a textarea, a password input or a textfield. We'd need to remove view (as in MVC's view) code from expand functions.
 * Add flags to fapitng_Form for every handling stage to indicate if that stage has been executed.
 * Store form include files. See drupal_retrieve_form().
 
@@ -15,6 +14,8 @@ THOUGHTS OF A CODING ATHEIST
 * Elements can accidentally be changed in places like theme functions. This can affect a form's behavior. How do we solve this? Lock all properties? Pass a cloned element on to the theme system? What about memory implications?
 * Do we need #after_build or can hook_form_BUILD_CALLBACK_alter() and $elementstng_Element->expand_callbacks() achieve the same?
 * Do we need two tokens (general token and cache token)? Can't we just use one?
+* What if we let FAPI work with data type elements first, and render them into actual input types depending on the output? E.g. a certain element needs to be text or an integer. In a later stage it needs to be decided if a text element is rendered as a textarea, a password input or a textfield. We'd need to remove view (as in MVC's view) code from expand functions.
+* Why should modules be able to decide where an element's title is rendered (before or after)? They shouldn't mess with output AT ALL. See #title_display.
 
 DONE
 * Converted functions:
@@ -26,6 +27,5 @@ DONE
 * #tree and #parents have been replaced by fapitng_FormElement::parent, which is a reference to the parent element or form.
 * More context awareness, because form elements can access their parent items and the form itself directly.
 * DIE, element_children(), DIEEEEEE!
-* Why should modules be able to decide where an element's title is rendered (before or after)? They shouldn't mess with output AT ALL. See #title_display.
 * DIE, _form_set_class(), DIE!
 * Prepopulate.module in core!
