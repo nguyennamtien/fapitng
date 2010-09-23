@@ -1,0 +1,33 @@
+<?php
+// $Id$
+
+function fubar_menu() {
+  $items['fubar'] = array(
+    'page callback' => 'fapitng_form_page',
+    'page arguments' => array('fubar_form', array('fubar_form')),
+    'access arguments' => array('fubar'),
+    'type' => MENU_CALLBACK,
+  );
+
+  return $items;
+}
+
+function fubar_form(fapitng_Form $form) {
+  $form->addChild(new fapitng_FormTextarea('title', array(
+    'title' => t('Hello world!'),
+    'description' => t('This is me :)'),
+    'required' => TRUE,
+  )));
+  $form->addChild(new fapitng_FormButton('submit', array(
+    'value' => t('Submittt'),
+    'required' => TRUE,
+  )));
+}
+
+function fubar_form_validate(fapitng_Form $form) {
+  
+}
+
+function fubar_form_submit(fapitng_Form $form) {
+  
+}

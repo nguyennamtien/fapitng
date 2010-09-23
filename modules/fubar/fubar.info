@@ -1,0 +1,6 @@
+; $Id$
+name = Fubar
+description = "Fubar fucks up as much as it can to expose bugs. The bar is just there to provide free beer."
+core = 7.x
+dependencies[] = fapitng
+files[] = fubar.module

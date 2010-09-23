@@ -1,0 +1,7 @@
+; $Id$
+name = Form API: the next generation
+description = "A new and improved form API. Make it so."
+core = 7.x
+dependencies[] = elementstng
+files[] = fapitng.module
+files[] = fapitng.install

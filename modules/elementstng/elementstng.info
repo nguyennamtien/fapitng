@@ -1,0 +1,5 @@
+; $Id$
+name = Renderable elements: the next generation
+description = "Objectify renderable elements. Number one, you have the bridge!"
+core = 7.x
+files[] = elementstng.module

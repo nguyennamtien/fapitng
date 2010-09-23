@@ -1,0 +1,9 @@
+<?php
+// $Id$
+
+/**
+ * Initialize the element API.
+ */
+function elementstng() {
+  module_load_include('inc', 'elementstng', '/includes/elementstng.elements');
+}
