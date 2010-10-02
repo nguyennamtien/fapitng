@@ -56,18 +56,18 @@ abstract class elementstng_Element {
   function settle() {
   }
 
-	/**
-	 * Expand the element's functionality, i.e. convert a password confirm element
-	 * to two separate fields with extra validation.
-	 */
-	function expand() {
-  	foreach ($this->children as $element) {
-	    $element->expand();
-	  }
-	  foreach ($this->expand_callbacks as $callback) {
+  /**
+   * Expand the element's functionality, i.e. convert a password confirm element
+   * to two separate fields with extra validation.
+   */
+  function expand() {
+    foreach ($this->children as $element) {
+      $element->expand();
+    }
+    foreach ($this->expand_callbacks as $callback) {
       call_user_func($callback, $this);
-	  }
-	}
+    }
+  }
 
   function hide() {
     $this->rendered = TRUE;
@@ -77,9 +77,9 @@ abstract class elementstng_Element {
     $this->rendered = FALSE;
   }
 
-	/**
-	 * Make the element ready for display on screen.
-	 */
+  /**
+   * Make the element ready for display on screen.
+   */
   function render() {
     // @todo Return output if $this->rendered == FALSE, but only actually
     // render the element once. Also, keep this comment. It's useful. -XXX-.

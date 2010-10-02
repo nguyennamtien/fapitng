@@ -91,11 +91,10 @@ function fapitng_form($form_id, array $build_callbacks) {
   $arguments = array_slice(func_get_args(), 2);
 
   $form = fapitng_form_construct($form_id, $build_callbacks, FALSE, $arguments);
-	$form->populate();
+  $form->populate();
   $output = $form->render();
-// @todo Remove debugging code.
 
-	return $output;
+  return $output;
 }
 
 /**
@@ -116,42 +115,40 @@ function fapitng_form_construct($form_id, array $build_callbacks = array(), $pro
   elementstng();
   module_load_include('inc', 'fapitng', '/includes/fapitng.elements');
 
-	// Prepare a new form and form state.
-	$form_state = new fapitng_FormState($arguments, $programmed);
-	$form = new fapitng_Form($form_id, $build_callbacks, $form_state);
+  // Prepare a new form and form state.
+  $form_state = new fapitng_FormState($arguments, $programmed);
+  $form = new fapitng_Form($form_id, $build_callbacks, $form_state);
 
   $form->prepare();
-	$form->build();
-	$form->expand();
+  $form->build();
+  $form->expand();
 
-	return $form;
+  return $form;
 }
 
 /**
  * Page callback to display a form.
- *
- * @todo Remove when moving to core.
  */
 function fapitng_form_page($form_id, array $build_callbacks) {
-	return array(
-	  '#markup' => fapitng_form($form_id, $build_callbacks),
-	);
+  return array(
+    '#markup' => fapitng_form($form_id, $build_callbacks),
+  );
 }
 
 /**
  * Contains a form's behavior.
  */
 class fapitng_FormState {
-	public $arguments = array();
-	public $cache = FALSE;
-	public $programmed = FALSE;
-	public $raw_input = array();
-	public $rebuild = FALSE;
-	public $redirect = '';
-	public $submit_element = NULL;
+  public $arguments = array();
+  public $cache = FALSE;
+  public $programmed = FALSE;
+  public $raw_input = array();
+  public $rebuild = FALSE;
+  public $redirect = '';
+  public $submit_element = NULL;
 
-	function __construct(array $arguments, $programmed = FALSE) {
-		$this->arguments = $arguments;
-		$this->programmed = $programmed;
-	}
+  function __construct(array $arguments, $programmed = FALSE) {
+    $this->arguments = $arguments;
+    $this->programmed = $programmed;
+  }
 }

@@ -3,25 +3,25 @@
 
 abstract class fapitng_FormBase extends elementstng_Element {
   public $attached = array();
-	public $build_callbacks = array();
+  public $build_callbacks = array();
   public $submit_callbacks = array();
 
-	function addChild(elementstng_Element $element) {
+  function addChild(elementstng_Element $element) {
     $element->form = $this instanceof fapitng_Form ? $this : $this->form;
-	  parent::addChild($element);
-	}
+    parent::addChild($element);
+  }
 
-	/**
-	 * Execute an element's submit callbacks.
-	 */
-	function submit() {
-		foreach ($this->submit_callbacks as $callback) {
-			call_user_func($callback, $this);
-		}
-		foreach ($this->children as $element) {
-		  $element->submit();
-		}
-	}
+  /**
+   * Execute an element's submit callbacks.
+   */
+  function submit() {
+    foreach ($this->submit_callbacks as $callback) {
+      call_user_func($callback, $this);
+    }
+    foreach ($this->children as $element) {
+      $element->submit();
+    }
+  }
 }
 
 /**
@@ -38,23 +38,23 @@ class fapitng_Form extends fapitng_FormBase {
   public $errors = array();
   public $expand_callbacks = array('fapitng_form_expand_form');
   public $method = 'POST';
-	public $state = array();
+  public $state = array();
   public $theme_wrapper_callbacks = array('fapitng_form');
-	public $token = '';
+  public $token = '';
   public $type = 'form';
-	public $valid = TRUE;
+  public $valid = TRUE;
   public $validate_callbacks = array();
   protected $built = FALSE;
 
-	function __construct($form_id, array $build_callbacks, fapitng_FormState $form_state) {
-	  global $user;
+  function __construct($form_id, array $build_callbacks, fapitng_FormState $form_state) {
+    global $user;
 
     $this->action = request_uri();
-	  $this->attributes['id'] = drupal_html_id('form-' . $form_id);
-		$this->build_callbacks = $build_callbacks;
-		$this->build_id = drupal_hash_base64(uniqid(mt_rand(), TRUE) . mt_rand());
-	  $this->id = $form_id;
-		$this->state = $form_state;
+    $this->attributes['id'] = drupal_html_id('form-' . $form_id);
+    $this->build_callbacks = $build_callbacks;
+    $this->build_id = drupal_hash_base64(uniqid(mt_rand(), TRUE) . mt_rand());
+    $this->id = $form_id;
+    $this->state = $form_state;
     // Add a token to forms displayed to authenticated users. This ensures that
     // any submitted form was actually requested previously by the user and
     // protects against cross site request forgeries.
@@ -62,22 +62,22 @@ class fapitng_Form extends fapitng_FormBase {
     // since tokens are session-bound and forms displayed to anonymous users
     // are very likely cached, we cannot assign a token for them. During
     // installation, there is no $user yet.
-		if (!empty($user->uid) &&  !$this->state->programmed) {
-		  $this->token = drupal_get_token($this->id);
-	  }
+    if (!empty($user->uid) &&  !$this->state->programmed) {
+      $this->token = drupal_get_token($this->id);
+    }
 
-		// Set validate and submit callbacks based on build callbacks.
-		foreach ($build_callbacks as $callback) {
-		  if (function_exists($callback . '_validate')) {
-		    $this->validate_callbacks[] = $callback . '_validate';
-		  }
-		  if (function_exists($callback . '_submit')) {
-		    $this->submit_callbacks[] = $callback . '_submit';
-		  }
-		}
-		// The first build callback defines the theme callback.
-		$this->theme_callback = $build_callbacks[0];
-	}
+    // Set validate and submit callbacks based on build callbacks.
+    foreach ($build_callbacks as $callback) {
+      if (function_exists($callback . '_validate')) {
+        $this->validate_callbacks[] = $callback . '_validate';
+      }
+      if (function_exists($callback . '_submit')) {
+        $this->submit_callbacks[] = $callback . '_submit';
+      }
+    }
+    // The first build callback defines the theme callback.
+    $this->theme_callback = $build_callbacks[0];
+  }
 
   /**
    * Prepare the form's basic elements.
@@ -104,28 +104,28 @@ class fapitng_Form extends fapitng_FormBase {
     }
   }
 
-	/**
-	 * Gather the form's elements.
-	 */
-	function build() {
-	  if (!$this->built) {
-	    $this->built = TRUE;
-  		foreach ($this->build_callbacks as $callback) {
-  			call_user_func($callback, $this);
-  			drupal_alter("fapitng_form_$callback", $this);
-  		}
-  		drupal_alter('fapitng_form', $this);
-		}
-	}
+  /**
+   * Gather the form's elements.
+   */
+  function build() {
+    if (!$this->built) {
+      $this->built = TRUE;
+      foreach ($this->build_callbacks as $callback) {
+        call_user_func($callback, $this);
+        drupal_alter("fapitng_form_$callback", $this);
+      }
+      drupal_alter('fapitng_form', $this);
+    }
+  }
 
   /**
    * Gather user inputted data and populate the form with it.
    */
-	function populate() {
-	  // Collect inputted data. Forms can receive input in three different ways:
-	  // - The form is set to accept POST and there is POST data.
-	  // - The form is set to accept POST and there is GET data (prepopulate).
-	  // - The form is set to accept GET and there is GET data.
+  function populate() {
+    // Collect inputted data. Forms can receive input in three different ways:
+    // - The form is set to accept POST and there is POST data.
+    // - The form is set to accept POST and there is GET data (prepopulate).
+    // - The form is set to accept GET and there is GET data.
     if ($this->method == 'POST' && isset($_POST['form_id']) && $_POST['form_id'] == $this->id) {
       $this->state->raw_input = $_POST;
     }
@@ -134,27 +134,27 @@ class fapitng_Form extends fapitng_FormBase {
     }
 
     // @todo Populate elements using (sanitized?) input and the default values.
-	}
+  }
 
-	/**
-	 * Validate the form and its input elements.
-	 */
-	function validate() {
-	  // @todo Remove module_load_include() call when moving to Drupal core.
-	  module_load_include('inc', 'fapitng', '/includes/fapitng.validate');
-		foreach ($this->validate_callbacks as $callback => $info) {
-			if (!call_user_func_array($callback, array_merge(array($this->value), $info['arguments']))) {
-			  $this->errors[] = $info['message'];
-			}
-		}
-	  $this->validateInputElements($this->children);
+  /**
+   * Validate the form and its input elements.
+   */
+  function validate() {
+    // @todo Remove module_load_include() call when moving to Drupal core.
+    module_load_include('inc', 'fapitng', '/includes/fapitng.validate');
+    foreach ($this->validate_callbacks as $callback => $info) {
+      if (!call_user_func_array($callback, array_merge(array($this->value), $info['arguments']))) {
+        $this->errors[] = $info['message'];
+      }
+    }
+    $this->validateInputElements($this->children);
 
-	  if (!$this->valid) {
-	    $this->state->rebuild = TRUE;
-	  }
+    if (!$this->valid) {
+      $this->state->rebuild = TRUE;
+    }
 
-	  return $this->valid;
-	}
+    return $this->valid;
+  }
 
   /**
    * Validate the form's input elements.
@@ -164,16 +164,16 @@ class fapitng_Form extends fapitng_FormBase {
    * @param $elements array
    *   The elements to validate.
    */
-	private function validateInputElements(array $elements) {
-	  foreach ($elements as $element) {
-	    if ($element instanceof fapitng_FormInput) {
-	      if (!$element->validate()) {
-	        $this->valid = FALSE;
-	      }
-	    }
-	    $this->validate_input_elements($element->children);
-	  }
-	}
+  private function validateInputElements(array $elements) {
+    foreach ($elements as $element) {
+      if ($element instanceof fapitng_FormInput) {
+        if (!$element->validate()) {
+          $this->valid = FALSE;
+        }
+      }
+      $this->validate_input_elements($element->children);
+    }
+  }
 }
 
 /**
@@ -183,7 +183,7 @@ class fapitng_FormElement extends fapitng_FormBase {
   public $access = TRUE;
   public $ajax = array();
   public $form = NULL;
-	public $parent = NULL;
+  public $parent = NULL;
   public $prefix = '';
   public $states = array();
   public $suffix = '';
@@ -199,9 +199,9 @@ class fapitng_FormElement extends fapitng_FormBase {
 
   function settle() {
     parent::settle();
-	  if (empty($this->attributes['name'])) {
-	    $this->attributes['name'] = $this->parent->id . '-' . $this->id;
-	  }
+    if (empty($this->attributes['name'])) {
+      $this->attributes['name'] = $this->parent->id . '-' . $this->id;
+    }
     if (empty($this->attributes['id'])) {
       $this->attributes['id'] = $this->form->id . '-' . $this->id;
     }
@@ -228,18 +228,18 @@ class fapitng_FormInput extends fapitng_FormElement {
     $this->attributes['value'] = '';
   }
 
-	/**
-	 * Check user input for the input element.
-	 */
-	function validate() {
-		foreach ($this->validate_callbacks as $callback => $info) {
-			if (!call_user_func_array($callback, array_merge(array($this->value), $info['arguments']))) {
-			  $this->errors[] = $info['message'];
-			}
-		}
+  /**
+   * Check user input for the input element.
+   */
+  function validate() {
+    foreach ($this->validate_callbacks as $callback => $info) {
+      if (!call_user_func_array($callback, array_merge(array($this->value), $info['arguments']))) {
+        $this->errors[] = $info['message'];
+      }
+    }
 
-		return empty($this->errors);
-	}
+    return empty($this->errors);
+  }
 }
 
 /**

@@ -32,20 +32,20 @@ var_dump($execution_fapi);
   drupal_set_message(t('Execution time for FAPI: !executionms.', array('!execution' => round($execution_fapi, 3))));
   drupal_set_message(t('FAPI TNG is !differencems faster than FAPI.', array('!difference' => round($execution_fapi - $execution_fapitng, 3))));
 
-	return array(
-	  'header_fapitng' => array(
-	    '#markup' => '<h2>' . t('FAPI TNG') . '</h2>',
-	  ),
-	  'fapitng' => array(
-	    '#markup' => $fapitng,
-	  ),
-	  'header_fapi' => array(
-	    '#markup' => '<h2>' . t('FAPI') . '</h2>',
-	  ),
-	  'fapi' => array(
-	    '#markup' => $fapi,
-	  ),
-	);
+  return array(
+    'header_fapitng' => array(
+      '#markup' => '<h2>' . t('FAPI TNG') . '</h2>',
+    ),
+    'fapitng' => array(
+      '#markup' => $fapitng,
+    ),
+    'header_fapi' => array(
+      '#markup' => '<h2>' . t('FAPI') . '</h2>',
+    ),
+    'fapi' => array(
+      '#markup' => $fapi,
+    ),
+  );
 }
 
 function fubar_form_fapitng(fapitng_Form $form) {
