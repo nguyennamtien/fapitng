@@ -132,7 +132,6 @@ class fapitng_Form extends fapitng_FormBase {
     else {
       $this->state->raw_input = $_GET;
     }
-    print_r($this->state->raw_input);
 
     // @todo Populate elements using (sanitized?) input and the default values.
 	}

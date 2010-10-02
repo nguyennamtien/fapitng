@@ -1,33 +1,76 @@
 <?php
 // $Id$
 
+function fubar_init() {
+  if (arg(0) != 'fubar') {
+    drupal_set_message(l('Test FAPI TNG', 'fubar'));
+  }
+}
+
 function fubar_menu() {
   $items['fubar'] = array(
-    'page callback' => 'fapitng_form_page',
-    'page arguments' => array('fubar_form', array('fubar_form')),
-    'access arguments' => array('fubar'),
+    'page callback' => 'fubar',
+    'access callback' => TRUE,
     'type' => MENU_CALLBACK,
   );
 
   return $items;
 }
 
-function fubar_form(fapitng_Form $form) {
+function fubar() {
+  $start = microtime(TRUE);
+  $fapi = drupal_render(drupal_get_form('fubar_form_fapi'));
+  $halftime = microtime(TRUE);
+  $fapitng = fapitng_form('fubar_form_fapitng', array('fubar_form_fapitng'));
+  $end = microtime(TRUE);
+
+  $execution_fapitng = ($halftime - $start) * 1000;
+  $execution_fapi = ($end - $halftime) * 1000;
+var_dump($execution_fapi);
+
+  drupal_set_message(t('Execution time for FAPI TNG: !executionms.', array('!execution' => round($execution_fapitng, 3))));
+  drupal_set_message(t('Execution time for FAPI: !executionms.', array('!execution' => round($execution_fapi, 3))));
+  drupal_set_message(t('FAPI TNG is !differencems faster than FAPI.', array('!difference' => round($execution_fapi - $execution_fapitng, 3))));
+
+	return array(
+	  'header_fapitng' => array(
+	    '#markup' => '<h2>' . t('FAPI TNG') . '</h2>',
+	  ),
+	  'fapitng' => array(
+	    '#markup' => $fapitng,
+	  ),
+	  'header_fapi' => array(
+	    '#markup' => '<h2>' . t('FAPI') . '</h2>',
+	  ),
+	  'fapi' => array(
+	    '#markup' => $fapi,
+	  ),
+	);
+}
+
+function fubar_form_fapitng(fapitng_Form $form) {
   $form->addChild(new fapitng_FormTextarea('title', array(
-    'title' => t('Hello world!'),
-    'description' => t('This is me :)'),
+    'title' => t('Title'),
+    'description' => t('Description'),
     'required' => TRUE,
   )));
   $form->addChild(new fapitng_FormButton('submit', array(
-    'value' => t('Submittt'),
+    'value' => t('Submit'),
     'required' => TRUE,
   )));
 }
 
-function fubar_form_validate(fapitng_Form $form) {
-  
-}
+function fubar_form_fapi(array $form, array &$form_state) {
+  $form['title'] = array(
+    '#type' => 'textarea',
+    '#title' => t('Title'),
+    '#description' => t('Description'),
+    '#required' => TRUE,
+  );
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Submit'),
+  );
 
-function fubar_form_submit(fapitng_Form $form) {
-  
+  return $form;
 }

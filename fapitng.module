@@ -94,7 +94,6 @@ function fapitng_form($form_id, array $build_callbacks) {
 	$form->populate();
   $output = $form->render();
 // @todo Remove debugging code.
-//print_r($form);
 
 	return $output;
 }
