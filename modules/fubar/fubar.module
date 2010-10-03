@@ -30,21 +30,21 @@ function fubar() {
     $i++;
 
     $start = microtime(TRUE);
-    $fapi = drupal_render(drupal_get_form('fubar_form_fapi'));
-    $halftime = microtime(TRUE);
     $fapitng = fapitng_form('fubar_form_fapitng', array('fubar_form_fapitng'));
+    $halftime = microtime(TRUE);
+    $fapi = drupal_render(drupal_get_form('fubar_form_fapi'));
     $end = microtime(TRUE);
 
-    $execution_fapitng += ($halftime - $start) * 1000;
-    $execution_fapi += ($end - $halftime) * 1000;
+    $execution_fapitng += $halftime - $start;
+    $execution_fapi += $end - $halftime;
   }
-  $execution_fapitng = $execution_fapitng / $forms;
-  $execution_fapi = $execution_fapi / $forms;
+  $execution_fapitng = $execution_fapitng / $forms * 1000;
+  $execution_fapi = $execution_fapi / $forms * 1000;
 
   drupal_set_message(t('Render !link1, !link1000 or !link10000 form(s).', array('!link1' => l('1', 'fubar/1'), '!link1000' => l('1000', 'fubar/1000'), '!link10000' => l('10,000', 'fubar/10000'))));
-  drupal_set_message(t('Execution time for FAPI TNG: !executionms.', array('!execution' => round($execution_fapitng, 3))));
-  drupal_set_message(t('Execution time for FAPI: !executionms.', array('!execution' => round($execution_fapi, 3))));
-  drupal_set_message(t('FAPI TNG is !differencems faster than FAPI.', array('!difference' => round($execution_fapi - $execution_fapitng, 3))));
+  drupal_set_message(t('Average execution time for FAPI TNG: !executionms.', array('!execution' => round($execution_fapitng, 3))));
+  drupal_set_message(t('Average execution time for FAPI: !executionms.', array('!execution' => round($execution_fapi, 3))));
+  drupal_set_message(t('FAPI TNG is on average !differencems faster than FAPI.', array('!difference' => round($execution_fapi - $execution_fapitng, 3))));
 
   return array(
     'header_fapitng' => array(
