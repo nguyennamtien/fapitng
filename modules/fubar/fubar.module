@@ -21,9 +21,16 @@ function fubar() {
   $execution_fapitng = 0;
   $execution_fapi = 0;
 
-  if (!is_numeric(arg(1))) {
+  if (arg(1) && !is_numeric(arg(1))) {
     drupal_not_found();
   }
+
+  // Load all necessary code files for a valid comparison with FAPI.
+  elementstng();
+  module_load_include('inc', 'fapitng', '/includes/fapitng.elements');
+  module_load_include('inc', 'fapitng', '/includes/fapitng.theme');
+  module_load_include('inc', 'fapitng', '/includes/fapitng.validate');
+
   $forms = arg(1) ? arg(1) : 1;
   $i = 0;
   while ($i < $forms) {
@@ -68,6 +75,16 @@ function fubar_form_fapitng(fapitng_Form $form) {
     'description' => t('Description'),
     'required' => TRUE,
   )));
+  $form->addChild(new fapitng_FormTextarea('body', array(
+    'title' => t('Body'),
+    'description' => t('Description'),
+    'required' => TRUE,
+  )));
+  $form->addChild(new fapitng_FormTextarea('log', array(
+    'title' => t('Log message'),
+    'description' => t('Description'),
+    'required' => TRUE,
+  )));
   $form->addChild(new fapitng_FormButton('submit', array(
     'value' => t('Submit'),
   )));
@@ -77,6 +94,18 @@ function fubar_form_fapi(array $form, array &$form_state) {
   $form['title'] = array(
     '#type' => 'textarea',
     '#title' => t('Title'),
+    '#description' => t('Description'),
+    '#required' => TRUE,
+  );
+  $form['body'] = array(
+    '#type' => 'textarea',
+    '#title' => t('Body'),
+    '#description' => t('Description'),
+    '#required' => TRUE,
+  );
+  $form['log'] = array(
+    '#type' => 'textarea',
+    '#title' => t('Log message'),
     '#description' => t('Description'),
     '#required' => TRUE,
   );
