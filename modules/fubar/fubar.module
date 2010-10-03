@@ -18,16 +18,30 @@ function fubar_menu() {
 }
 
 function fubar() {
-  $start = microtime(TRUE);
-  $fapi = drupal_render(drupal_get_form('fubar_form_fapi'));
-  $halftime = microtime(TRUE);
-  $fapitng = fapitng_form('fubar_form_fapitng', array('fubar_form_fapitng'));
-  $end = microtime(TRUE);
+  $execution_fapitng = 0;
+  $execution_fapi = 0;
 
-  $execution_fapitng = ($halftime - $start) * 1000;
-  $execution_fapi = ($end - $halftime) * 1000;
-var_dump($execution_fapi);
+  if (!is_numeric(arg(1))) {
+    drupal_not_found();
+  }
+  $forms = arg(1) ? arg(1) : 1;
+  $i = 0;
+  while ($i < $forms) {
+    $i++;
 
+    $start = microtime(TRUE);
+    $fapi = drupal_render(drupal_get_form('fubar_form_fapi'));
+    $halftime = microtime(TRUE);
+    $fapitng = fapitng_form('fubar_form_fapitng', array('fubar_form_fapitng'));
+    $end = microtime(TRUE);
+
+    $execution_fapitng += ($halftime - $start) * 1000;
+    $execution_fapi += ($end - $halftime) * 1000;
+  }
+  $execution_fapitng = $execution_fapitng / $forms;
+  $execution_fapi = $execution_fapi / $forms;
+
+  drupal_set_message(t('Render !link1, !link1000 or !link10000 form(s).', array('!link1' => l('1', 'fubar/1'), '!link1000' => l('1000', 'fubar/1000'), '!link10000' => l('10,000', 'fubar/10000'))));
   drupal_set_message(t('Execution time for FAPI TNG: !executionms.', array('!execution' => round($execution_fapitng, 3))));
   drupal_set_message(t('Execution time for FAPI: !executionms.', array('!execution' => round($execution_fapi, 3))));
   drupal_set_message(t('FAPI TNG is !differencems faster than FAPI.', array('!difference' => round($execution_fapi - $execution_fapitng, 3))));
