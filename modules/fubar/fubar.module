@@ -42,9 +42,9 @@ function fubar() {
   $execution_fapi = $execution_fapi / $forms * 1000;
 
   drupal_set_message(t('Render !link1, !link1000 or !link10000 form(s).', array('!link1' => l('1', 'fubar/1'), '!link1000' => l('1000', 'fubar/1000'), '!link10000' => l('10,000', 'fubar/10000'))));
-  drupal_set_message(t('Average execution time for FAPI TNG: !executionms.', array('!execution' => round($execution_fapitng, 3))));
-  drupal_set_message(t('Average execution time for FAPI: !executionms.', array('!execution' => round($execution_fapi, 3))));
-  drupal_set_message(t('FAPI TNG is on average !differencems faster than FAPI.', array('!difference' => round($execution_fapi - $execution_fapitng, 3))));
+  drupal_set_message(t('Average execution time for FAPI TNG: <strong>!executionms</strong>.', array('!execution' => round($execution_fapitng, 3))));
+  drupal_set_message(t('Average execution time for FAPI: <strong>!executionms</strong>.', array('!execution' => round($execution_fapi, 3))));
+  drupal_set_message(t('FAPI TNG is <strong>!percentage%</strong> as heavy as FAPI.', array('!percentage' => round(($execution_fapitng / $execution_fapi) * 100))));
 
   return array(
     'header_fapitng' => array(
@@ -70,7 +70,6 @@ function fubar_form_fapitng(fapitng_Form $form) {
   )));
   $form->addChild(new fapitng_FormButton('submit', array(
     'value' => t('Submit'),
-    'required' => TRUE,
   )));
 }
 
