@@ -104,6 +104,34 @@ function theme_fapitng_form_element_textarea(array $variables) {
 }
 
 /**
+ * Theme a textfield or a password input.
+ */
+function theme_fapitng_form_element_textfield(array $variables) {
+  $element = $variables['element'];
+  $element->attributes['type'] = $element->type;
+
+  $hidden = NULL;
+  if (drupal_valid_path($element->autocomplete_path)) {
+    drupal_add_js('misc/autocomplete.js');
+    $element->attributes['class'][] = 'form-autocomplete';
+
+    $hidden_attributes = array(
+      'type' => 'hidden',
+      'id' => $element->attributes['id'] . '-autocomplete',
+      'value' => url($element->autocomplete_path, array('absolute' => TRUE)),
+      'disabled' => 'disabled',
+      'class' => array('autocomplete'),
+    );
+    $hidden = '<input' . drupal_attributes($hidden_attributes) . ' />';
+  }
+
+  $output = '<input' . drupal_attributes($element->attributes) . ' />';
+
+  return $output . $hidden;
+
+}
+
+/**
  * Theme a hidden form input.
  */
 function theme_fapitng_form_element_hidden(array $variables) {

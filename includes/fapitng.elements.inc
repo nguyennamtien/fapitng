@@ -264,18 +264,19 @@ class fapitng_FormVerticalTabs extends fapitng_FormElement {
 }
 
 class fapitng_FormPassword extends fapitng_FormTextInput {
-  public $expand_callbacks = array('fapitng_form_expand_text');
+  public $expand_callbacks = array('fapitng_form_expand_textfield');
   public $max_length = 128;
   public $size = 60;
+  public $theme_callback = 'fapitng_form_element_textfield';
   public $type = 'password';
 }
 
-class fapitng_FormText extends fapitng_FormTextInput {
+class fapitng_FormTextField extends fapitng_FormTextInput {
   public $autocomplete_path = '';
-  public $expand_callbacks = array('fapitng_form_expand_text');
+  public $expand_callbacks = array('fapitng_form_expand_textfield');
   public $max_length = 128;
   public $size = 60;
-  public $text_format = FILTER_FORMAT_DEFAULT;
+  public $theme_callback = 'fapitng_form_element_textfield';
   public $type = 'text';
 }
 
@@ -437,7 +438,7 @@ function fapitng_form_expand_text_input(fapitng_FormTextInput $element) {
   }
 }
 
-function fapitng_form_expand_text(fapitng_FormTextfield $element) {
+function fapitng_form_expand_textfield(fapitng_FormTextfield $element) {
   if ($element->max_length) {
     $element->attributes['class']['maxlength'] = $element->max_length;
   }

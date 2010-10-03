@@ -61,6 +61,7 @@ function fapitng_theme() {
     'label',
     'required_marker',
     'element_textarea',
+    'element_textfield',
     'element_hidden',
     'element_button',
   );
