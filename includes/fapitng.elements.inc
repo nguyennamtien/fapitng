@@ -181,7 +181,6 @@ class fapitng_Form extends fapitng_FormBase {
  */
 class fapitng_FormElement extends fapitng_FormBase {
   public $access = TRUE;
-  public $ajax = array();
   public $form = NULL;
   public $parent = NULL;
   public $prefix = '';
@@ -242,6 +241,32 @@ class fapitng_FormInput extends fapitng_FormElement {
   }
 }
 
+class fapitng_FormFieldset extends fapitng_FormElement {
+  public $collapsed = FALSE;
+  public $collapsible = FALSE;
+  public $group = NULL;
+  // @todo Replace form_pre_render_fieldset().
+  public $pre_render_callbacks = array('form_pre_render_fieldset');
+  public $type = 'fieldset';
+
+  function __construct($id, array $properties = array()) {
+    parent::__construct($id, $properties);
+    $this->expand_callbacks[] = 'fapitng_expand_fieldset';
+    $this->theme_wrapper_callbacks[] = 'fapitng_form_fieldset';
+  }
+}
+
+class fapitng_FormVerticalTabs extends fapitng_FormElement {
+  public $default_tab = '';
+  public $type = 'vertical_tabs';
+
+  function __construct($id, array $properties = array()) {
+    parent::__construct($id, $properties);
+    $this->expand_callbacks[] = 'fapitng_expand_vertical_tabs';
+    $this->theme_wrapper_callbacks[] = 'fapitng_form_vertical_tabs';
+  }
+}
+
 /**
  * Base class for elements that accept text input.
  */
@@ -251,33 +276,32 @@ class fapitng_FormTextInput extends fapitng_FormInput {
   public $min_length = 0;
 }
 
-class fapitng_FormFieldset extends fapitng_FormElement {
-  public $collapsed = FALSE;
-  public $collapsible = FALSE;
-  public $group = NULL;
-  public $type = 'fieldset';
-}
-
-class fapitng_FormVerticalTabs extends fapitng_FormElement {
-  public $default_tab = '';
-  public $type = 'vertical_tabs';
-}
-
-class fapitng_FormPassword extends fapitng_FormTextInput {
-  public $expand_callbacks = array('fapitng_form_expand_textfield');
-  public $max_length = 128;
-  public $size = 60;
-  public $theme_callback = 'fapitng_form_element_textfield';
-  public $type = 'password';
-}
-
 class fapitng_FormTextField extends fapitng_FormTextInput {
   public $autocomplete_path = '';
   public $expand_callbacks = array('fapitng_form_expand_textfield');
   public $max_length = 128;
-  public $size = 60;
-  public $theme_callback = 'fapitng_form_element_textfield';
+  public $theme_callback = 'fapitng_form_textfield';
   public $type = 'text';
+
+  function __construct($id, array $properties = array()) {
+    parent::__construct($id, $properties);
+    $this->attributes['size'] = 60;
+  }
+}
+
+class fapitng_FormPassword extends fapitng_FormTextField {
+  public $type = 'password';
+}
+
+class fapitng_FormPasswordConfirm extends fapitng_FormPassword {
+  public $type = 'password_confirm';
+
+  function __construct($id, array $properties = array()) {
+    parent::__construct($id, $properties);
+    // @todo Merge form_process_password_confirm() and
+    // user_form_process_password_confirm().
+      $this->expand_callbacks[] = 'fapitng_form_expand_password_confirm';
+  }
 }
 
 class fapitng_FormTextarea extends fapitng_FormTextInput {
@@ -285,7 +309,7 @@ class fapitng_FormTextarea extends fapitng_FormTextInput {
   public $cols = 60;
   public $resizable = TRUE;
   public $rows = 5;
-  public $theme_callback = 'fapitng_form_element_textarea';
+  public $theme_callback = 'fapitng_form_textarea';
   public $type = 'textarea';
 
   function __construct($id, array $properties = array()) {
@@ -294,77 +318,135 @@ class fapitng_FormTextarea extends fapitng_FormTextInput {
   }
 }
 
-class fapitng_FormWeight extends fapitng_FormInput {
-  public $delta = 10;
-  public $type = 'weight';
-}
-
-class fapitng_FormTableSelect extends fapitng_FormInput {
+class fapitng_FormTableselect extends fapitng_FormInput {
   public $empty = '';
   public $header = array();
   public $js_select = FALSE;
-  public $multiple = FALSE;
+  public $multiple = TRUE;
   public $options = array();
+  public $theme_callback = 'fapitng_form_tableselect';
   public $type = 'table_select';
+
+  function __construct($id, array $properties = array()) {
+    parent::__construct($id, $properties);
+    $this->expand_callbacks[] = 'fapitng_form_expand_tableselect';
+  }
 }
 
 class fapitng_FormButton extends fapitng_FormInput {
-  public $execute_submit_handler = TRUE;
-  public $limit_validation_errors = array();
+  // @todo Implement $execute_submit_handler.
+  public $execute_submit_handler = FALSE;
+  // @todo Implement $limit_validation ($limit_validation_errors in Drupal 7).
+  public $limit_validation = array();
   public $return_value = '';
-  public $theme_callback = 'fapitng_form_element_button';
+  public $theme_callback = 'fapitng_form_button';
   public $type = 'button';
+}
+
+class fapitng_FormSubmit extends fapitng_FormButton {
+  public $execute_submit_handler = TRUE;
+  public $type = 'submit';
 }
 
 class fapitng_FormImageButton extends fapitng_FormButton {
   public $source = '';
+  public $theme_callback = 'fapitng_form_image_button';
   public $type = 'image_button';
 }
 
 class fapitng_FormSelect extends fapitng_FormInput {
   public $multiple = FALSE;
   public $options = array();
+  // @todo Copy from the comment in Drupal 7. Check validity.
+  // In order to be able to determine whether a select list needs an empty
+  // default option, #required has to be NULL by default, as form_builder()
+  // preemptively sets #required to FALSE for all elements.
+  // @see form_process_select()
+  public $required = NULL;
+  public $theme_callback = 'fapitng_form_select';
   public $type = 'select';
+
+  function __construct($id, array $properties = array()) {
+    parent::__construct($id, $properties);
+    // @todo Replace form_process_select().
+      $this->expand_callbacks[] = 'fapitng_form_expand_select';
+  }
 }
 
-class fapitng_FormCheckboxes extends fapitng_FormInput {
-  public $options = array();
-  public $type = 'checkboxes';
+class fapitng_FormWeight extends fapitng_FormSelect {
+  public $delta = 10;
+  public $type = 'weight';
+  public $value = 0;
+
+  function __construct($id, array $properties = array()) {
+    parent::__construct($id, $properties);
+    // @todo Replace form_process_select().
+      $this->expand_callbacks[] = 'fapitng_form_expand_weight';
+  }
 }
 
-class fapitng_FormRadios extends fapitng_FormInput {
-  public $options = array();
-  public $type = 'radios';
-}
+class fapitng_FormDate extends fapitng_FormInput {
+  // @todo Do we need a theme callback for this element?
+  public $theme_callback = 'fapitng_form_date';
+  public $type = 'date';
 
-class fapitng_FormCheckbox extends fapitng_FormInput {
-  public $return_value = '';
-  public $type = 'checkbox';
+  function __construct($id, array $properties = array()) {
+    parent::__construct($id, $properties);
+    // @todo Replace form_process_date().
+      $this->expand_callbacks[] = 'fapitng_form_expand_date';
+  }
 }
 
 class fapitng_FormRadio extends fapitng_FormInput {
   public $return_value = '';
+  public $theme_callback = 'fapitng_form_radio';
   public $type = 'radio';
 }
 
-class fapitng_FormDate extends fapitng_FormInput {
-  public $type = 'date';
+class fapitng_FormRadios extends fapitng_FormInput {
+  public $expand_callbacks = array('fapitng_form_expand_radios');
+  public $options = array();
+  // @ todo Implement pre render callback.
+  public $pre_render_callbacks = array('form_pre_render_conditional_form_element');
+  public $type = 'radios';
+
+  function __construct($id, array $properties = array()) {
+    parent::__construct($id, $properties);
+    array_unshift($this->theme_wrapper_callbacks, 'fapitng_form_radios');
+  }
+}
+
+class fapitng_FormCheckbox extends fapitng_FormInput {
+  public $return_value = '';
+  public $theme_callback = 'fapitng_form_checkbox';
+  public $type = 'checkbox';
+}
+
+class fapitng_FormCheckboxes extends fapitng_FormInput {
+  public $expand_callbacks = array('fapitng_form_expand_checkboxes');
+  public $options = array();
+  // @ todo Implement pre render callback.
+  public $pre_render_callbacks = array('form_pre_render_conditional_form_element');
+  public $type = 'checkboxes';
+
+  function __construct($id, array $properties = array()) {
+    parent::__construct($id, $properties);
+    array_unshift($this->theme_wrapper_callbacks, 'fapitng_form_checkboxes');
+  }
 }
 
 class fapitng_FormFile extends fapitng_FormInput {
+  public $theme_callback = 'fapitng_form_file';
   public $type = 'file';
-}
 
-class fapitng_FormManagedFile extends fapitng_FormInput {
-  public $type = 'managed_file';
-}
-
-class fapitng_FormPasswordConfirm extends fapitng_FormInput {
-  public $type = 'password_confirm';
+  function __construct($id, array $properties = array()) {
+    parent::__construct($id, $properties);
+    $this->attributes['size'] = 60;
+  }
 }
 
 class fapitng_FormHidden extends fapitng_FormInput {
-  public $theme_callback = 'fapitng_form_element_hidden';
+  public $theme_callback = 'fapitng_form_hidden';
   public $type = 'hidden';
 }
 
@@ -384,6 +466,13 @@ class fapitng_FormToken extends fapitng_FormHidden {
       'arguments' => array($this->form->id),
     );
   }
+}
+
+class fapitng_FormItem extends fapitng_FormElement {
+  public $markup = '';
+  // @todo callback cannot work with elementstng_Elements yet.
+  public $pre_render_callbacks = array('drupal_pre_render_markup');
+  public $type = 'item';
 }
 
 function fapitng_form_expand_form(fapitng_Form $form) {

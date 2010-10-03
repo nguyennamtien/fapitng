@@ -2,6 +2,31 @@
 // $Id$
 
 /**
+ * Implement hook_theme().
+ */
+function elementstng_theme() {
+  $file = array(
+    'file' => 'elementstng.theme.inc',
+    'path' => drupal_get_path('module', 'elementstng') . '/includes/',
+  );
+  $element_names = array(
+    'markup',
+    'page',
+    'html_tag',
+    'container',
+  );
+  foreach ($element_names as $element_name) {
+    $theme["elementstng_$element_name"] = $file + array(
+      'variables' => array(
+        'element' => NULL,
+      ),
+    );
+  }
+
+  return $theme;
+}
+
+/**
  * Initialize the element API.
  */
 function elementstng() {

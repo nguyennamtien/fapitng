@@ -57,13 +57,22 @@ function fapitng_theme() {
     ),
   );
   $element_names = array(
-    'element',
     'label',
     'required_marker',
-    'element_textarea',
-    'element_textfield',
-    'element_hidden',
-    'element_button',
+    'fieldset',
+    'vertical_tabs',
+    'textfield',
+    'textarea',
+    'tableselect',
+    'button',
+    'image_button',
+    'select',
+    'radio',
+    'radios',
+    'checkbox',
+    'checkboxes',
+    'file', 
+    'hidden',
   );
   foreach ($element_names as $element_name) {
     $theme["fapitng_form_$element_name"] = $file + array(

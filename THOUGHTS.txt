@@ -20,7 +20,8 @@ THOUGHTS OF A CODING ATHEIST
 DONE
 * Converted functions:
   * drupal_prepare_form()
-  * 
+  * system_element_info()
+  *
 * Hook_forms() has been replaced by form arguments and multiple build callbacks.
 * Hook_form_BASE_FORM_ID_alter() and hook_form_FORM_ID_alter() have been replaced by hook_form_BUILD_CALLBACK_alter().
 * #process has been replaced by the 'expand' property.

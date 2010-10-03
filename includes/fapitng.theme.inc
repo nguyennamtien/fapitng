@@ -85,7 +85,7 @@ function theme_fapitng_form_required_marker(array $variables) {
 /**
  * Theme a textarea.
  */
-function theme_fapitng_form_element_textarea(array $variables) {
+function theme_fapitng_form_textarea(array $variables) {
   $element = $variables['element'];
 
   $wrapper_attributes = array(
@@ -106,12 +106,13 @@ function theme_fapitng_form_element_textarea(array $variables) {
 /**
  * Theme a textfield or a password input.
  */
-function theme_fapitng_form_element_textfield(array $variables) {
+function theme_fapitng_form_textfield(array $variables) {
   $element = $variables['element'];
   $element->attributes['type'] = $element->type;
 
   $hidden = NULL;
   if (drupal_valid_path($element->autocomplete_path)) {
+    // @todo Add JS and class in expand callback.
     drupal_add_js('misc/autocomplete.js');
     $element->attributes['class'][] = 'form-autocomplete';
 
@@ -134,7 +135,7 @@ function theme_fapitng_form_element_textfield(array $variables) {
 /**
  * Theme a hidden form input.
  */
-function theme_fapitng_form_element_hidden(array $variables) {
+function theme_fapitng_form_hidden(array $variables) {
   $element = $variables['element'];
   $element->attributes['type'] = 'hidden';
 
@@ -144,7 +145,7 @@ function theme_fapitng_form_element_hidden(array $variables) {
 /**
  * Theme a form button.
  */
-function theme_fapitng_form_element_button(array $variables) {
+function theme_fapitng_form_button(array $variables) {
   $element = $variables['element'];
 
   $attributes = $element->attributes;
