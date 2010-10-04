@@ -5,20 +5,23 @@
  * @file
  * Drupal's form handling API.
  *
- * @see fapitng_Form::cacheGet()
+ * @see fapitng_Form::populate()
  * @see fapitng_Form::construct()
+ * @see fapitng_Form::cacheGet()
  * @see fapitng_Form::build()
  * @see elementstng_Element::expand()
  * @see elementstng_Element::render()
- * @see fapitng_Form::populate()
  * @see fapitng_Form::validate()
  * @see fapitng_FormBase::submit()
  *
  * Form handling has the following stages:
  * CONSTRUCTION
+ * - Receive
+ *   The form receives client input.
+ * (
  * - Cache get
- *   Load the form from the cache if possible.
- * or
+ *   Load the previously constructed form from the cache if possible.
+ * ) or (
  * - Prepare
  *   Fill a form with all the necessary default elements.
  * - Build
@@ -28,19 +31,18 @@
  *   This is the first layer with form logic to expand the form's
  *   functionality, i.e. convert a password confirm element to two separate
  *   fields with extra validation.
+ * )
+ * - Populate
+ *   Fill input elements with values received from client input.
  * - Cache set
  *   Cache the constructed form.
- * USER INTERACTION (Optional)
+ * USER INTERACTION (Optional. These stages are skipped when submitting a form
+ * programmatically.)
  * - Render
  *   Make a form ready for display on a screen. This stage is passed when
  *   submitting a form programmatically.
- *
- * At this point the form can be populated with data, either programmatically
- * or through the interface.
- *
- * - Populate
- *   The form receives user input and prepares it for validation. This stage is
- *   passed when submitting a form programmatically.
+ * - CONSTRUCTION
+ *   Reconstruct the form as described above.
  * - Validate
  *   Check user input for a rendered form. This stage is passed when submitting
  *   a form programmatically.
@@ -114,7 +116,6 @@ function fapitng_form($form_id, array $build_callbacks) {
 
   $form = new fapitng_Form($form_id, $build_callbacks, $arguments);
   $form->construct();
-  $form->populate();
 
   return $form->render();
 }

@@ -155,10 +155,12 @@ class fapitng_Form extends fapitng_FormBase {
   }
 
   function construct() {
+    $this->receive();
     if (!$this->cacheGet()) {
       $this->prepare();
       $this->build();
       $this->expand();
+      $this->populate();
       $this->cacheSet();
     }
   }
@@ -166,7 +168,7 @@ class fapitng_Form extends fapitng_FormBase {
   /**
    * Gather user inputted data and populate the form with it.
    */
-  function populate() {
+  function receive() {
     // Collect inputted data. Forms can receive input in three different ways:
     // - The form is set to accept POST and there is POST data.
     // - The form is set to accept POST and there is GET data (prepopulate).
@@ -177,8 +179,11 @@ class fapitng_Form extends fapitng_FormBase {
     else {
       $this->state['raw_input'] = $_GET;
     }
+  }
 
-    // @todo Populate elements using (sanitized?) input and the default values.
+  // @todo Finish using $this->state['raw_input'].
+  function populate() {
+    
   }
 
   /**
@@ -240,7 +245,8 @@ class fapitng_Form extends fapitng_FormBase {
   function cacheGet() {
     global $user;
 
-    if ($cached = cache_get($this->build_id, 'fapitng_cache_form')) {
+    // @todo Fix build ID variable.
+    if (isset($this->state['raw_input']['build_id']) && $cached = cache_get($this->state['raw_input']['build_id'], 'fapitng_cache_form')) {
       $form = $cached->data;
 
       if ($user->uid && drupal_valid_token($form->token)) {
