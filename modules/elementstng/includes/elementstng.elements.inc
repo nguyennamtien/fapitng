@@ -98,6 +98,7 @@ abstract class elementstng_Element {
           'element' => $this,
         ));
 
+
         // Render child elements.
         foreach ($this->children as $element) {
           $this->rendered_content .= $element->render();

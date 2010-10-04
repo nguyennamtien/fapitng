@@ -5,15 +5,20 @@
  * @file
  * Drupal's form handling API.
  *
+ * @see fapitng_Form::cacheGet()
+ * @see fapitng_Form::construct()
  * @see fapitng_Form::build()
  * @see elementstng_Element::expand()
  * @see elementstng_Element::render()
- * @see fapitng_Form::receive()
+ * @see fapitng_Form::populate()
  * @see fapitng_Form::validate()
  * @see fapitng_FormBase::submit()
  *
  * Form handling has the following stages:
  * CONSTRUCTION
+ * - Cache get
+ *   Load the form from the cache if possible.
+ * or
  * - Prepare
  *   Fill a form with all the necessary default elements.
  * - Build
@@ -23,18 +28,20 @@
  *   This is the first layer with form logic to expand the form's
  *   functionality, i.e. convert a password confirm element to two separate
  *   fields with extra validation.
- * USER INTERACTION
- * - Render (optional)
+ * - Cache set
+ *   Cache the constructed form.
+ * USER INTERACTION (Optional)
+ * - Render
  *   Make a form ready for display on a screen. This stage is passed when
  *   submitting a form programmatically.
  *
  * At this point the form can be populated with data, either programmatically
  * or through the interface.
  *
- * - Populate (Optional)
+ * - Populate
  *   The form receives user input and prepares it for validation. This stage is
  *   passed when submitting a form programmatically.
- * - Validate (Optional)
+ * - Validate
  *   Check user input for a rendered form. This stage is passed when submitting
  *   a form programmatically.
  * PROCESSING
@@ -57,6 +64,7 @@ function fapitng_theme() {
     ),
   );
   $element_names = array(
+    'element',
     'label',
     'required_marker',
     'fieldset',
@@ -100,40 +108,15 @@ function fapitng_theme() {
 function fapitng_form($form_id, array $build_callbacks) {
   $arguments = array_slice(func_get_args(), 2);
 
-  $form = fapitng_form_construct($form_id, $build_callbacks, FALSE, $arguments);
-  $form->populate();
-  $output = $form->render();
-
-  return $output;
-}
-
-/**
- * Construct a Drupal form.
- * 
- * @param $form_id string
- *   The identifier for this form. Does not necessarily equal the HTML ID.
- * @param $build_callbacks array
- *   The names of the form builder functions.
- * @param $programmed boolean
- *   Whether the form will be handled programmatically or through the user
- *   interface.
- * @param ...
- *   Additional arguments to pass on to the build callbacks.
- */
-function fapitng_form_construct($form_id, array $build_callbacks = array(), $programmed = FALSE, array $arguments = array()) {
   // @todo Remove when moving to core.
   elementstng();
   module_load_include('inc', 'fapitng', '/includes/fapitng.elements');
 
-  // Prepare a new form and form state.
-  $form_state = new fapitng_FormState($arguments, $programmed);
-  $form = new fapitng_Form($form_id, $build_callbacks, $form_state);
+  $form = new fapitng_Form($form_id, $build_callbacks, $arguments);
+  $form->construct();
+  $form->populate();
 
-  $form->prepare();
-  $form->build();
-  $form->expand();
-
-  return $form;
+  return $form->render();
 }
 
 /**
@@ -143,22 +126,4 @@ function fapitng_form_page($form_id, array $build_callbacks) {
   return array(
     '#markup' => fapitng_form($form_id, $build_callbacks),
   );
-}
-
-/**
- * Contains a form's behavior.
- */
-class fapitng_FormState {
-  public $arguments = array();
-  public $cache = FALSE;
-  public $programmed = FALSE;
-  public $raw_input = array();
-  public $rebuild = FALSE;
-  public $redirect = '';
-  public $submit_element = NULL;
-
-  function __construct(array $arguments, $programmed = FALSE) {
-    $this->arguments = $arguments;
-    $this->programmed = $programmed;
-  }
 }

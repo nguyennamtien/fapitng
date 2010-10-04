@@ -28,17 +28,52 @@ abstract class fapitng_FormBase extends elementstng_Element {
  * Contains the entire form structure.
  */
 class fapitng_Form extends fapitng_FormBase {
+  // @todo Implement form_state_defaults() and form_state_keys_no_cache().
   public $action = '';
   public $ajax = array();
+  // @todo This was $form_state['build_info']['args'].
+  public $arguments = array();
   public $attributes = array(
     'accept-charset' => 'UTF-8',
     'id' => '',
   );
   public $build_id = '';
+  public $cache = FALSE;
   public $errors = array();
   public $expand_callbacks = array('fapitng_form_expand_form');
+  // @todo This was $form_state['build_info']['files'].
+  public $files = array();
   public $method = 'POST';
-  public $state = array();
+  public $programmed = FALSE;
+  public $rebuild = FALSE;
+  // Contains properties for this specific request that must not be cached.
+  public $state = array(
+    // @todo Confirm properties and their default values.
+    // Public properties defined by form constructors and form handlers.
+    'always_process' => NULL,
+    'must_validate' => NULL,
+    'no_redirect' => NULL,
+    'rebuild' => FALSE,
+    'rebuild_info' => array(),
+    'redirect' => NULL,
+    'temporary' => array(),
+    // Internal properties defined by form processing.
+    'buttons' => array(),
+    'executed' => FALSE,
+    'clicked_button' => NULL,
+    'complete form' => NULL,
+    'groups' => array(),
+    'input' => NULL,
+    'raw_input' => array(),
+    'submit_handlers' => NULL,
+    'submitted' => FALSE,
+    'triggering_element' => NULL,
+    'validate_handlers' => NULL,
+    'values' => NULL,
+  );
+  // Data storage intended for use by any module that needs to store something.
+  public $storage = array();
+  public $submit_element = NULL;
   public $theme_wrapper_callbacks = array('fapitng_form');
   public $token = '';
   public $type = 'form';
@@ -46,7 +81,7 @@ class fapitng_Form extends fapitng_FormBase {
   public $validate_callbacks = array();
   protected $built = FALSE;
 
-  function __construct($form_id, array $build_callbacks, fapitng_FormState $form_state) {
+  function __construct($form_id, array $build_callbacks, array $arguments = array(), $programmed = FALSE) {
     global $user;
 
     $this->action = request_uri();
@@ -54,7 +89,6 @@ class fapitng_Form extends fapitng_FormBase {
     $this->build_callbacks = $build_callbacks;
     $this->build_id = drupal_hash_base64(uniqid(mt_rand(), TRUE) . mt_rand());
     $this->id = $form_id;
-    $this->state = $form_state;
     // Add a token to forms displayed to authenticated users. This ensures that
     // any submitted form was actually requested previously by the user and
     // protects against cross site request forgeries.
@@ -62,7 +96,7 @@ class fapitng_Form extends fapitng_FormBase {
     // since tokens are session-bound and forms displayed to anonymous users
     // are very likely cached, we cannot assign a token for them. During
     // installation, there is no $user yet.
-    if (!empty($user->uid) &&  !$this->state->programmed) {
+    if (!empty($user->uid) && !$this->programmed) {
       $this->token = drupal_get_token($this->id);
     }
 
@@ -77,6 +111,8 @@ class fapitng_Form extends fapitng_FormBase {
     }
     // The first build callback defines the theme callback.
     $this->theme_callback = $build_callbacks[0];
+
+    $this->populate();
   }
 
   /**
@@ -118,6 +154,15 @@ class fapitng_Form extends fapitng_FormBase {
     }
   }
 
+  function construct() {
+    if (!$this->cacheGet()) {
+      $this->prepare();
+      $this->build();
+      $this->expand();
+      $this->cacheSet();
+    }
+  }
+
   /**
    * Gather user inputted data and populate the form with it.
    */
@@ -127,10 +172,10 @@ class fapitng_Form extends fapitng_FormBase {
     // - The form is set to accept POST and there is GET data (prepopulate).
     // - The form is set to accept GET and there is GET data.
     if ($this->method == 'POST' && isset($_POST['form_id']) && $_POST['form_id'] == $this->id) {
-      $this->state->raw_input = $_POST;
+      $this->state['raw_input'] = $_POST;
     }
     else {
-      $this->state->raw_input = $_GET;
+      $this->state['raw_input'] = $_GET;
     }
 
     // @todo Populate elements using (sanitized?) input and the default values.
@@ -150,7 +195,7 @@ class fapitng_Form extends fapitng_FormBase {
     $this->validateInputElements($this->children);
 
     if (!$this->valid) {
-      $this->state->rebuild = TRUE;
+      $this->state['rebuild'] = TRUE;
     }
 
     return $this->valid;
@@ -173,6 +218,53 @@ class fapitng_Form extends fapitng_FormBase {
       }
       $this->validate_input_elements($element->children);
     }
+  }
+
+  /**
+   * Cache the form.
+   */
+  function cacheSet() {
+    // @todo Do we need a #cache_token?
+    if ($this->token) {
+      // Don't cache the form's state.
+      $state = $this->state;
+      unset($this->state);
+      cache_set($this->build_id, $this, 'fapitng_cache_form', REQUEST_TIME + 21600);
+      $this->state = $state;
+    }
+  }
+
+  /**
+   * Get the form from the cache
+   */
+  function cacheGet() {
+    global $user;
+
+    if ($cached = cache_get($this->build_id, 'fapitng_cache_form')) {
+      $form = $cached->data;
+
+      if ($user->uid && drupal_valid_token($form->token)) {
+        foreach ($form as $property => $value) {
+          $this->$property = $value;
+        }
+
+        // If the original form is contained in include files, load the files.
+        foreach ($this->files as $file) {
+          if (is_array($file)) {
+            $file += array(
+              'type' => 'inc',
+              'name' => $file['module'],
+            );
+            module_load_include($file['type'], $file['module'], $file['name']);
+          }
+          elseif (file_exists($file)) {
+            require_once DRUPAL_ROOT . '/' . $file;
+          }
+        }
+      }
+      return TRUE;
+    }
+    return FALSE;
   }
 }
 

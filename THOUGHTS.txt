@@ -16,6 +16,7 @@ THOUGHTS OF A CODING ATHEIST
 * Do we need two tokens (general token and cache token)? Can't we just use one?
 * What if we let FAPI work with data type elements first, and render them into actual input types depending on the output? E.g. a certain element needs to be text or an integer. In a later stage it needs to be decided if a text element is rendered as a textarea, a password input or a textfield. We'd need to remove view (as in MVC's view) code from expand functions.
 * Why should modules be able to decide where an element's title is rendered (before or after)? They shouldn't mess with output AT ALL. See #title_display.
+* DO we need $old_form as used in drupal_rebuild_form()?
 
 DONE
 * Converted functions:
