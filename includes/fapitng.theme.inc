@@ -108,7 +108,10 @@ function theme_fapitng_form_textarea(array $variables) {
  */
 function theme_fapitng_form_textfield(array $variables) {
   $element = $variables['element'];
-  $element->attributes['type'] = $element->type;
+  $element_attributes = array_merge($element->attributes, array(
+    'type' => $element->type,
+    'value' => $element->value,
+  ));
 
   $hidden = NULL;
   if (drupal_valid_path($element->autocomplete_path)) {
@@ -126,7 +129,7 @@ function theme_fapitng_form_textfield(array $variables) {
     $hidden = '<input' . drupal_attributes($hidden_attributes) . ' />';
   }
 
-  $output = '<input' . drupal_attributes($element->attributes) . ' />';
+  $output = '<input' . drupal_attributes($element_attributes) . ' />';
 
   return $output . $hidden;
 

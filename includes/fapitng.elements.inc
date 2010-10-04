@@ -111,8 +111,6 @@ class fapitng_Form extends fapitng_FormBase {
     }
     // The first build callback defines the theme callback.
     $this->theme_callback = $build_callbacks[0];
-
-    $this->populate();
   }
 
   /**
@@ -181,9 +179,33 @@ class fapitng_Form extends fapitng_FormBase {
     }
   }
 
-  // @todo Finish using $this->state['raw_input'].
+  /**
+   * Validate the form's input elements.
+   */
   function populate() {
-    
+    $this->populateInputElements($this->children);
+  }
+  
+  /**
+   * Validate the form's input elements.
+   *
+   * This is a recursive function, which is called from $this::validate().
+   *
+   * @param $elements array
+   *   The elements to validate.
+   */
+  private function populateInputElements(array $elements) {
+    // @todo Finish using $this->state['raw_input'].
+    foreach ($elements as $element) {
+      if ($element instanceof fapitng_FormInput) {
+        if (isset($this->state['raw_input'][$element->attributes['name']])) {
+          // @todo We inject client input directly into the form. What about
+          // security issues?
+          $element->value = $this->state['raw_input'][$element->attributes['name']];
+        }
+      }
+      $this->populateInputElements($element->children);
+    }
   }
 
   /**
