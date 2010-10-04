@@ -1,6 +1,9 @@
 <?php
 // $Id$
 
+/**
+ * Basic behavior shared by forms and form elements.
+ */
 abstract class fapitng_FormBase extends elementstng_Element {
   public $attached = array();
   public $build_callbacks = array();
@@ -25,7 +28,7 @@ abstract class fapitng_FormBase extends elementstng_Element {
 }
 
 /**
- * Contains the entire form structure.
+ * A Drupal form.
  */
 class fapitng_Form extends fapitng_FormBase {
   // @todo Implement form_state_defaults() and form_state_keys_no_cache().
@@ -115,6 +118,8 @@ class fapitng_Form extends fapitng_FormBase {
 
   /**
    * Prepare the form's basic elements.
+   *
+   * @return NULL
    */
   function prepare() {
     $this->addChild(new fapitng_FormHidden('form_build_id', array(
@@ -140,6 +145,8 @@ class fapitng_Form extends fapitng_FormBase {
 
   /**
    * Gather the form's elements.
+   *
+   * @return NULL
    */
   function build() {
     if (!$this->built) {
@@ -152,6 +159,11 @@ class fapitng_Form extends fapitng_FormBase {
     }
   }
 
+  /**
+   * Execute the form's construction stages.
+   *
+   * @return NULL
+   */
   function construct() {
     $this->receive();
     if (!$this->cacheGet()) {
@@ -165,6 +177,10 @@ class fapitng_Form extends fapitng_FormBase {
 
   /**
    * Gather user inputted data and populate the form with it.
+   *
+   * @todo Allow input to be passed on directly as well.
+   *
+   * @return NULL
    */
   function receive() {
     // Collect inputted data. Forms can receive input in three different ways:
@@ -180,19 +196,23 @@ class fapitng_Form extends fapitng_FormBase {
   }
 
   /**
-   * Validate the form's input elements.
+   * Populate the form's input elements.
+   *
+   * @return NULL
    */
   function populate() {
     $this->populateInputElements($this->children);
   }
   
   /**
-   * Validate the form's input elements.
+   * Populate the form's input elements.
    *
-   * This is a recursive function, which is called from $this::validate().
+   * This is a recursive function, which is called from $this::populate().
    *
    * @param $elements array
-   *   The elements to validate.
+   *   The elements to populate.
+   *
+   * @return NULL
    */
   private function populateInputElements(array $elements) {
     // @todo Finish using $this->state['raw_input'].
@@ -201,6 +221,8 @@ class fapitng_Form extends fapitng_FormBase {
         if (isset($this->state['raw_input'][$element->attributes['name']])) {
           // @todo We inject client input directly into the form. What about
           // security issues?
+          // @todo Make the items in $this->state['values'] references to the
+          // elements.
           $element->value = $this->state['raw_input'][$element->attributes['name']];
         }
       }
@@ -210,6 +232,9 @@ class fapitng_Form extends fapitng_FormBase {
 
   /**
    * Validate the form and its input elements.
+   *
+   * @return boolean
+   *   Whether the form input is valid or not.
    */
   function validate() {
     // @todo Remove module_load_include() call when moving to Drupal core.
@@ -235,6 +260,8 @@ class fapitng_Form extends fapitng_FormBase {
    *
    * @param $elements array
    *   The elements to validate.
+   *
+   * @return NULL
    */
   private function validateInputElements(array $elements) {
     foreach ($elements as $element) {
@@ -249,6 +276,8 @@ class fapitng_Form extends fapitng_FormBase {
 
   /**
    * Cache the form.
+   *
+   * @return NULL
    */
   function cacheSet() {
     // @todo Do we need a #cache_token?
@@ -263,6 +292,9 @@ class fapitng_Form extends fapitng_FormBase {
 
   /**
    * Get the form from the cache
+   *
+   * @return boolean
+   *   Whether the form was successfully loaded from the cache or not.
    */
   function cacheGet() {
     global $user;
@@ -349,6 +381,9 @@ class fapitng_FormInput extends fapitng_FormElement {
 
   /**
    * Check user input for the input element.
+   *
+   * @return boolean
+   *   Whether the element's value is valid or not.
    */
   function validate() {
     foreach ($this->validate_callbacks as $callback => $info) {

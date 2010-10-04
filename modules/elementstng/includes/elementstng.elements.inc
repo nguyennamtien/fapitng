@@ -31,20 +31,46 @@ abstract class elementstng_Element {
     }
   }
 
+  /**
+   * Get an element's child elements.
+   *
+   * @return array
+   *   An array with elementstng_Element objects.
+   */
   function children() {
     return $this->children;
   }
 
+  /**
+   * Get a particular child of this element.
+   *
+   * @return elementstng_Element
+   */
   function child($element_id) {
     return $this->children[$element_id];
   }
 
+  /**
+   * Add a child element to this one.
+   *
+   * @param $element elementstng_Element
+   *   The new child element.
+   *
+   * @return NULL
+   */
   function addChild(elementstng_Element $element) {
     $this->children[$element->id] = $element;
     $element->parent = $this;
     $element->settle();
   }
 
+  /**
+   * Remove a child element from this element.
+   *
+   * @todo Turn around, so it is invoked on the child element instead?
+   *
+   * @return NULL
+   */
   function removeChild(elementstng_Element $element) {
     unset($this->children[$element->id]);
   }
@@ -54,6 +80,8 @@ abstract class elementstng_Element {
    *
    * Empty function, because it's optional, but we don't want to check for its
    * existence every time we need it, and this way it documents itself.
+   *
+   * @return NULL
    */
   function settle() {
   }
@@ -61,6 +89,8 @@ abstract class elementstng_Element {
   /**
    * Expand the element's functionality, i.e. convert a password confirm element
    * to two separate fields with extra validation.
+   *
+   * @return NULL
    */
   function expand() {
     foreach ($this->children as $element) {
@@ -71,16 +101,29 @@ abstract class elementstng_Element {
     }
   }
 
+  /**
+   * Prevent the element from being rendered.
+   *
+   * @return NULL
+   */
   function hide() {
     $this->rendered = TRUE;
   }
 
+  /**
+   * Make sure the element can be rendered.
+   *
+   * @return NULL
+   */
   function show() {
     $this->rendered = FALSE;
   }
 
   /**
    * Make the element ready for display on screen.
+   *
+   * @return string
+   *   The rendered element.
    */
   function render() {
     // @todo Return output if $this->rendered == FALSE, but only actually

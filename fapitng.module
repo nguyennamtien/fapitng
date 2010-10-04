@@ -18,10 +18,12 @@
  * CONSTRUCTION
  * - Receive
  *   The form receives client input.
- * (
+ *
  * - Cache get
  *   Load the previously constructed form from the cache if possible.
- * ) or (
+ *
+ * or
+ *
  * - Prepare
  *   Fill a form with all the necessary default elements.
  * - Build
