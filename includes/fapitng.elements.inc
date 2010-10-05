@@ -177,18 +177,29 @@ class fapitng_Form extends fapitng_FormBase {
   /**
    * Gather user inputted data and populate the form with it.
    *
-   * @todo Allow input to be passed on directly as well.
+   * Forms can receive input in four different ways:
+   * 1) As an argument passed on to this function.
+   * 2) The form is set to accept POST and there is POST data.
+   * 3) The form is set to accept POST and there is GET data (prepopulate).
+   * 4) The form is set to accept GET and there is GET data.
+   *
+   * @param $raw_input array
+   *   An array where keys are input element names and values the elements'
+   *   values. Is an alias for changing fapitng_Form::state['raw_input']
+   *   directly.
    *
    * @return NULL
    */
-  function receive() {
-    // Collect inputted data. Forms can receive input in three different ways:
-    // - The form is set to accept POST and there is POST data.
-    // - The form is set to accept POST and there is GET data (prepopulate).
-    // - The form is set to accept GET and there is GET data.
-    if ($this->method == 'POST' && isset($_POST['form_id']) && $_POST['form_id'] == $this->id) {
+  function receive(array $raw_input = array()) {
+    // Input type 1.
+    if ($raw_input) {
+      $this->state['raw_input'] = $raw_input;
+    }
+    // Input type 2.
+    elseif ($this->method == 'POST' && isset($_POST['form_id']) && $_POST['form_id'] == $this->id) {
       $this->state['raw_input'] = $_POST;
     }
+    // Input types 3 and 4.
     else {
       $this->state['raw_input'] = $_GET;
     }
