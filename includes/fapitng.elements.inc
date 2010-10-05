@@ -149,14 +149,12 @@ class fapitng_Form extends fapitng_FormBase {
    * @return NULL
    */
   function build() {
-    if (!$this->built) {
-      $this->built = TRUE;
-      foreach ($this->build_callbacks as $callback) {
-        call_user_func($callback, $this);
-        drupal_alter("fapitng_form_$callback", $this);
-      }
-      drupal_alter('fapitng_form', $this);
+    $this->built = TRUE;
+    foreach ($this->build_callbacks as $callback) {
+      call_user_func($callback, $this);
+      drupal_alter("fapitng_form_$callback", $this);
     }
+    drupal_alter('fapitng_form', $this);
   }
 
   /**
@@ -201,7 +199,9 @@ class fapitng_Form extends fapitng_FormBase {
    * @return NULL
    */
   function populate() {
-    $this->populateInputElements($this->children);
+    if ($this->state['raw_input']) {
+      $this->populateInputElements($this->children);
+    }
   }
   
   /**
@@ -215,7 +215,6 @@ class fapitng_Form extends fapitng_FormBase {
    * @return NULL
    */
   private function populateInputElements(array $elements) {
-    // @todo Finish using $this->state['raw_input'].
     foreach ($elements as $element) {
       if ($element instanceof fapitng_FormInput) {
         if (isset($this->state['raw_input'][$element->attributes['name']])) {
@@ -301,10 +300,10 @@ class fapitng_Form extends fapitng_FormBase {
 
     // @todo Fix build ID variable.
     if (isset($this->state['raw_input']['build_id']) && $cached = cache_get($this->state['raw_input']['build_id'], 'fapitng_cache_form')) {
-      $form = $cached->data;
+      $form_cached = $cached->data;
 
-      if ($user->uid && drupal_valid_token($form->token)) {
-        foreach ($form as $property => $value) {
+      if ($user->uid && drupal_valid_token($form_cached->token, $this->id)) {
+        foreach ($form_cached as $property => $value) {
           $this->$property = $value;
         }
 

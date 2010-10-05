@@ -17,7 +17,7 @@ abstract class elementstng_Element {
   public $type = '';
   public $weight = 0;
   protected $children = array();
-  protected $rendered = FALSE;
+  protected $hidden = FALSE;
 
   function __construct($id, array $properties = array()) {
     $this->id = $id;
@@ -107,7 +107,7 @@ abstract class elementstng_Element {
    * @return NULL
    */
   function hide() {
-    $this->rendered = TRUE;
+    $this->hidden = TRUE;
   }
 
   /**
@@ -116,7 +116,7 @@ abstract class elementstng_Element {
    * @return NULL
    */
   function show() {
-    $this->rendered = FALSE;
+    $this->hidden = FALSE;
   }
 
   /**
@@ -126,21 +126,16 @@ abstract class elementstng_Element {
    *   The rendered element.
    */
   function render() {
-    // @todo Return output if $this->rendered == FALSE, but only actually
-    // render the element once. Also, keep this comment. It's useful. -XXX-.
-    if (!$this->rendered) {
+    if (!$this->hidden) {
       foreach ($this->pre_render_callbacks as $callback) {
         call_user_func($callback, $this);
       }
       // Allow pre_render to abort rendering by calling $this->hide().
-      if (!$this->rendered) {
-        $this->rendered = TRUE;
-
+      if (!$this->hidden) {
         // Render the element itself.
         $this->rendered_content = theme($this->theme_callback, array(
           'element' => $this,
         ));
-
 
         // Render child elements.
         foreach ($this->children as $element) {
@@ -154,6 +149,9 @@ abstract class elementstng_Element {
         foreach ($this->post_render_callbacks as $callback) {
           call_user_func($callback, $this);
         }
+
+        // We have rendered the element, so hide it.
+        $this->hide();
       }
 
       return $this->rendered_content;
