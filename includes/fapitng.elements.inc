@@ -72,6 +72,7 @@ class fapitng_Form extends fapitng_FormBase {
     'submitted' => FALSE,
     'triggering_element' => NULL,
     'validate_handlers' => NULL,
+    // References to the value properties of all input elements.
     'values' => NULL,
   );
   // Data storage intended for use by any module that needs to store something.
@@ -220,9 +221,8 @@ class fapitng_Form extends fapitng_FormBase {
         if (isset($this->state['raw_input'][$element->attributes['name']])) {
           // @todo We inject client input directly into the form. What about
           // security issues?
-          // @todo Make the items in $this->state['values'] references to the
-          // elements.
           $element->value = $this->state['raw_input'][$element->attributes['name']];
+          $this->state['values'][$element->attributes['name']] = $element->value;
         }
       }
       $this->populateInputElements($element->children);
