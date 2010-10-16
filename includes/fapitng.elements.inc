@@ -206,18 +206,18 @@ class fapitng_Form extends fapitng_FormBase {
   }
 
   /**
-   * Populate the form's input elements.
+   * Populate the form's input elements and state.
    *
    * @return NULL
    */
   function populate() {
     if ($this->state['raw_input']) {
-      $this->populateInputElements($this->children);
+      $this->populateElements($this->children);
     }
   }
   
   /**
-   * Populate the form's input elements.
+   * Populate the form's input elements and state.
    *
    * This is a recursive function, which is called from $this::populate().
    *
@@ -226,17 +226,37 @@ class fapitng_Form extends fapitng_FormBase {
    *
    * @return NULL
    */
-  private function populateInputElements(array $elements) {
+  private function populateElements(array $elements) {
     foreach ($elements as $element) {
+      $this->populateElements($element->children);
+
+      // Decide which button triggered form submission, if there was any.
+      if ($element instanceof fapitng_FormButton && (
+      // When image buttons are clicked, browsers do NOT pass the form element
+      // value in $_POST. Instead they pass an integer representing the
+      // coordinates of the click on the button image. This means that image
+      // buttons MUST have unique $form['#name'] values, but the details of
+      // their $_POST data should be ignored.
+      $element instanceof fapitng_FormImageButton && !empty($element->value)
+      ||
+      // This is no image button, but a regular one. If it has been clicked,
+      // its value appears in the raw input. This ONLY works as long as
+      // $element->attributes['name'] puts the value at the top level of the
+      // tree with raw input.
+      isset($this->state['raw_input'][$element->attributes['name']]) && $this->state['raw_input'][$element->attributes['name']] == $element->value
+      )) {
+        $this->state['triggering_element'] = $element;
+      }
+
+      // Populate this element if it's an input element.
       if ($element instanceof fapitng_FormInput) {
         if (isset($this->state['raw_input'][$element->attributes['name']])) {
           // @todo We inject client input directly into the form. What about
           // security issues?
           $element->value = $this->state['raw_input'][$element->attributes['name']];
-          $this->state['values'][$element->attributes['name']] = $element->value;
+          $this->state['values'][$element->attributes['name']] = &$element->value;
         }
       }
-      $this->populateInputElements($element->children);
     }
   }
 
