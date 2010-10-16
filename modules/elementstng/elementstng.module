@@ -7,7 +7,7 @@
 function elementstng_theme() {
   $file = array(
     'file' => 'elementstng.theme.inc',
-    'path' => drupal_get_path('module', 'elementstng') . '/includes/',
+    'path' => drupal_get_path('module', 'elementstng') . '/includes',
   );
   $element_names = array(
     'markup',
