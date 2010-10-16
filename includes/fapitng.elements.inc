@@ -1,6 +1,5 @@
 <?php
 // $Id$
-include 'tweet/QueryPath/QueryPath.php';
 
 /**
  * Basic behavior shared by forms and form elements.
