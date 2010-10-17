@@ -91,7 +91,7 @@ function fubar_form_fapitng(fapitng_Form $form) {
 }
 
 function fubar_form_fapitng_submit(fapitng_Form $form) {
-  echo 'yaman';
+  drupal_set_message(t('The Fubar FAPI TNG form has been submitted.'));
 }
 
 function fubar_form_fapi(array $form, array &$form_state) {
