@@ -35,7 +35,7 @@
  *   fields with extra validation.
  * )
  * - Populate
- *   Fill input elements with values received from client input.
+ *   Fill input elements and request data with client input.
  * - Cache set
  *   Cache the constructed form.
  * USER INTERACTION (Optional. These stages are skipped when submitting a form
@@ -118,6 +118,13 @@ function fapitng_form($form_id, array $build_callbacks) {
 
   $form = new fapitng_Form($form_id, $build_callbacks, $arguments);
   $form->construct();
+
+  if ($form->request['submitted']) {
+    if ($form->programmed || !$form->programmed && $form->validate()) {
+      $form->submit();
+      // @todo Add destination/redirect support.
+    }
+  }
 
   return $form->render();
 }

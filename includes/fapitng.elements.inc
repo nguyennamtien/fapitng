@@ -41,6 +41,7 @@ class fapitng_Form extends fapitng_FormBase {
   );
   public $build_id = '';
   public $cache = FALSE;
+  public $childrenWithErrors = array();
   public $errors = array();
   public $expand_callbacks = array('fapitng_form_expand_form');
   // @todo This was $form_state['build_info']['files'].
@@ -214,7 +215,18 @@ class fapitng_Form extends fapitng_FormBase {
       $this->populateElements($this->children);
     }
   }
-  
+
+  function render() {
+    // Set system messages for validation errors.
+    foreach ($this->childrenWithErrors as $element) {
+      foreach ($element->errors as $error) {
+        drupal_set_message($error, 'error');
+      }
+    }
+
+    return parent::render();
+  }
+
   /**
    * Populate the form's input elements and request data.
    *
@@ -249,6 +261,7 @@ class fapitng_Form extends fapitng_FormBase {
           isset($this->request['raw_input'][$element->attributes['name']]) && $this->request['raw_input'][$element->attributes['name']] == $element->value
         ) {
         $this->request['trigger'] = $element;
+        $this->request['submitted'] = TRUE;
       }
 
       // Populate this element if it's an input element.
@@ -304,7 +317,7 @@ class fapitng_Form extends fapitng_FormBase {
           $this->valid = FALSE;
         }
       }
-      $this->validate_input_elements($element->children);
+      $this->validateInputElements($element->children);
     }
   }
 
@@ -421,8 +434,12 @@ class fapitng_FormInput extends fapitng_FormElement {
    */
   function validate() {
     foreach ($this->validate_callbacks as $callback => $info) {
+      $info += array(
+        'arguments' => array(),
+      );
       if (!call_user_func_array($callback, array_merge(array($this->value), $info['arguments']))) {
         $this->errors[] = $info['message'];
+        $this->form->childrenWithErrors[] = $this;
       }
     }
 
@@ -460,20 +477,24 @@ class fapitng_FormVerticalTabs extends fapitng_FormElement {
  * Base class for elements that accept text input.
  */
 class fapitng_FormTextInput extends fapitng_FormInput {
-  public $expand_callbacks = array('fapitng_form_expand_text_input');
   public $max_length = 0;
   public $min_length = 0;
+
+  function __construct($id, array $properties = array()) {
+    parent::__construct($id, $properties);
+    $this->expand_callbacks[] = 'fapitng_form_expand_text_input';
+  }
 }
 
 class fapitng_FormTextField extends fapitng_FormTextInput {
   public $autocomplete_path = '';
-  public $expand_callbacks = array('fapitng_form_expand_textfield');
   public $max_length = 128;
   public $theme_callback = 'fapitng_form_textfield';
   public $type = 'text';
 
   function __construct($id, array $properties = array()) {
     parent::__construct($id, $properties);
+    $this->expand_callbacks[] = 'fapitng_form_expand_textfield';
     $this->attributes['size'] = 60;
   }
 }

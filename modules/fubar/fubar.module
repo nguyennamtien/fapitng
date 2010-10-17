@@ -90,6 +90,10 @@ function fubar_form_fapitng(fapitng_Form $form) {
   )));
 }
 
+function fubar_form_fapitng_submit(fapitng_Form $form) {
+  echo 'yaman';
+}
+
 function fubar_form_fapi(array $form, array &$form_state) {
   $form['title'] = array(
     '#type' => 'textfield',
