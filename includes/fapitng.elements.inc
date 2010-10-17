@@ -31,7 +31,6 @@ abstract class fapitng_FormBase extends elementstng_Element {
  * A Drupal form.
  */
 class fapitng_Form extends fapitng_FormBase {
-  // @todo Implement form_state_defaults() and form_state_keys_no_cache().
   public $action = '';
   public $ajax = array();
   // @todo This was $form_state['build_info']['args'].
@@ -50,7 +49,7 @@ class fapitng_Form extends fapitng_FormBase {
   public $programmed = FALSE;
   public $rebuild = FALSE;
   // Contains properties for this specific request that must not be cached.
-  public $state = array(
+  public $request = array(
     // @todo Confirm properties and their default values.
     // Public properties defined by form constructors and form handlers.
     'always_process' => NULL,
@@ -70,7 +69,7 @@ class fapitng_Form extends fapitng_FormBase {
     'raw_input' => array(),
     'submit_handlers' => NULL,
     'submitted' => FALSE,
-    'triggering_element' => NULL,
+    'trigger' => NULL,
     'validate_handlers' => NULL,
     // References to the value properties of all input elements.
     'values' => NULL,
@@ -185,7 +184,7 @@ class fapitng_Form extends fapitng_FormBase {
    *
    * @param $raw_input array
    *   An array where keys are input element names and values the elements'
-   *   values. Is an alias for changing fapitng_Form::state['raw_input']
+   *   values. Is an alias for changing fapitng_Form::request['raw_input']
    *   directly.
    *
    * @return NULL
@@ -193,31 +192,31 @@ class fapitng_Form extends fapitng_FormBase {
   function receive(array $raw_input = array()) {
     // Input type 1.
     if ($raw_input) {
-      $this->state['raw_input'] = $raw_input;
+      $this->request['raw_input'] = $raw_input;
     }
     // Input type 2.
     elseif ($this->method == 'POST' && isset($_POST['form_id']) && $_POST['form_id'] == $this->id) {
-      $this->state['raw_input'] = $_POST;
+      $this->request['raw_input'] = $_POST;
     }
     // Input types 3 and 4.
     else {
-      $this->state['raw_input'] = $_GET;
+      $this->request['raw_input'] = $_GET;
     }
   }
 
   /**
-   * Populate the form's input elements and state.
+   * Populate the form's input elements and request data.
    *
    * @return NULL
    */
   function populate() {
-    if ($this->state['raw_input']) {
+    if ($this->request['raw_input']) {
       $this->populateElements($this->children);
     }
   }
   
   /**
-   * Populate the form's input elements and state.
+   * Populate the form's input elements and request data.
    *
    * This is a recursive function, which is called from $this::populate().
    *
@@ -247,19 +246,19 @@ class fapitng_Form extends fapitng_FormBase {
           // Its value appears in the raw input. This ONLY works as long as
           // $element->attributes['name'] puts the value at the top level of the
           // tree with raw input.
-          isset($this->state['raw_input'][$element->attributes['name']]) && $this->state['raw_input'][$element->attributes['name']] == $element->value
+          isset($this->request['raw_input'][$element->attributes['name']]) && $this->request['raw_input'][$element->attributes['name']] == $element->value
         ) {
-        $this->state['triggering_element'] = $element;
+        $this->request['trigger'] = $element;
       }
 
       // Populate this element if it's an input element.
       if ($element instanceof fapitng_FormInput) {
-        if (isset($this->state['raw_input'][$element->attributes['name']])) {
+        if (isset($this->request['raw_input'][$element->attributes['name']])) {
           // @todo We inject client input directly into the form. What about
           // security issues?
           // @todo What about #value_callback?
-          $element->value = $this->state['raw_input'][$element->attributes['name']];
-          $this->state['values'][$element->attributes['name']] = &$element->value;
+          $element->value = $this->request['raw_input'][$element->attributes['name']];
+          $this->request['values'][$element->attributes['name']] = &$element->value;
         }
       }
     }
@@ -282,7 +281,7 @@ class fapitng_Form extends fapitng_FormBase {
     $this->validateInputElements($this->children);
 
     if (!$this->valid) {
-      $this->state['rebuild'] = TRUE;
+      $this->request['rebuild'] = TRUE;
     }
 
     return $this->valid;
@@ -317,11 +316,11 @@ class fapitng_Form extends fapitng_FormBase {
   function cacheSet() {
     // @todo Do we need a #cache_token?
     if ($this->token) {
-      // Don't cache the form's state.
-      $state = $this->state;
-      unset($this->state);
+      // Don't cache the form's request data.
+      $request = $this->request;
+      unset($this->request);
       cache_set($this->build_id, $this, 'fapitng_cache_form', REQUEST_TIME + 21600);
-      $this->state = $state;
+      $this->request = $request;
     }
   }
 
@@ -335,7 +334,7 @@ class fapitng_Form extends fapitng_FormBase {
     global $user;
 
     // @todo Fix build ID variable.
-    if (isset($this->state['raw_input']['build_id']) && $cached = cache_get($this->state['raw_input']['build_id'], 'fapitng_cache_form')) {
+    if (isset($this->request['raw_input']['build_id']) && $cached = cache_get($this->request['raw_input']['build_id'], 'fapitng_cache_form')) {
       $form_cached = $cached->data;
 
       if ($user->uid && drupal_valid_token($form_cached->token, $this->id)) {

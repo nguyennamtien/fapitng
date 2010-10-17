@@ -37,7 +37,7 @@ WHAT'S CONVERTED?
 * Hook_form_BASE_FORM_ID_alter() and hook_form_FORM_ID_alter() have been replaced by hook_form_BUILD_CALLBACK_alter().
 * #process has been replaced by the 'expand' property.
 * #tree and #parents have been replaced by fapitng_FormElement::parent, which is a reference to the parent element or form.
-* fapitng_Form now contains all properties from $form_state, except those defined in form_state_keys_no_cache(), which are located in fapitng_Form::state.
+* fapitng_Form now contains all properties from $form_state, except those defined in form_state_keys_no_cache(), which are located in fapitng_Form::request. Those properties are to be used for a single page request only.
 
 
 WHAT'S NEW?
