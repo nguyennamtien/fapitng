@@ -10,6 +10,7 @@ TO DO
 * Make multi-step forms as easy to handle as possible.
 * Add flags to fapitng_Form for every handling stage to indicate if that stage has been executed.
 * Store form include files. See drupal_retrieve_form().
+* Rebuild support. Make sure there are no two builds (no caching for anonymous users).
 
 
 THOUGHTS OF A CODING ATHEIST
@@ -32,6 +33,7 @@ WHAT'S CONVERTED?
   * system_element_info()
   * _form_button_was_clicked()
   * _form_element_triggered_scripted_submission()
+  * drupal_redirect_form()
 * Caching
 * Hook_forms() has been replaced by form arguments and multiple build callbacks.
 * Hook_form_BASE_FORM_ID_alter() and hook_form_FORM_ID_alter() have been replaced by hook_form_BUILD_CALLBACK_alter().

@@ -52,6 +52,7 @@
  * - Submit
  *   Process input after the form has been submitted. Data can be stored or
  *   actions taken.
+ * - Redirect (Optional)
  */
 
 /**
@@ -122,7 +123,7 @@ function fapitng_form($form_id, array $build_callbacks) {
   if ($form->request['submitted']) {
     if ($form->programmed || !$form->programmed && $form->validate()) {
       $form->submit();
-      // @todo Add destination/redirect support.
+      $form->redirect();
     }
   }
 

@@ -42,6 +42,11 @@ class fapitng_Form extends fapitng_FormBase {
   public $build_id = '';
   public $cache = FALSE;
   public $childrenWithErrors = array();
+  public $destination = array(
+    'path' => NULL,
+    'options' => array(),
+    'http_response_code' => 302
+  );
   public $errors = array();
   public $expand_callbacks = array('fapitng_form_expand_form');
   // @todo This was $form_state['build_info']['files'].
@@ -55,10 +60,8 @@ class fapitng_Form extends fapitng_FormBase {
     // Public properties defined by form constructors and form handlers.
     'always_process' => NULL,
     'must_validate' => NULL,
-    'no_redirect' => NULL,
     'rebuild' => FALSE,
     'rebuild_info' => array(),
-    'redirect' => NULL,
     'temporary' => array(),
     // Internal properties defined by form processing.
     'buttons' => array(),
@@ -92,6 +95,9 @@ class fapitng_Form extends fapitng_FormBase {
     $this->attributes['id'] = drupal_html_id('form-' . $form_id);
     $this->build_callbacks = $build_callbacks;
     $this->build_id = drupal_hash_base64(uniqid(mt_rand(), TRUE) . mt_rand());
+    if ($_GET['q']['destination']) {
+      $this->destination['path'] = $_GET['destination'];
+    }
     $this->id = $form_id;
     // Add a token to forms displayed to authenticated users. This ensures that
     // any submitted form was actually requested previously by the user and
@@ -318,6 +324,22 @@ class fapitng_Form extends fapitng_FormBase {
         }
       }
       $this->validateInputElements($element->children);
+    }
+  }
+
+  /**
+   * Redirect the user based on form data.
+   *
+   * @return NULL
+   */
+  function redirect() {
+    if (!$this->programmed && !$this->request['rebuild'] && $this->destination) {
+      if (drupal_installation_attempted()) {
+        install_goto($this->destination['path']);
+      }
+      else {
+        drupal_goto($this->destination['path'], $this->destination['options'], $this->destination['http_response_code']);
+      }
     }
   }
 
