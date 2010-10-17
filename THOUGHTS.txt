@@ -21,6 +21,7 @@ THOUGHTS OF A CODING ATHEIST
 * What if we let FAPI work with data type elements first, and render them into actual input types depending on the output? E.g. a certain element needs to be text or an integer. In a later stage it needs to be decided if a text element is rendered as a textarea, a password input or a textfield. We'd need to remove view (as in MVC's view) code from expand functions.
 * Why should modules be able to decide where an element's title is rendered (before or after)? They shouldn't mess with output AT ALL. See #title_display.
 * Do we need $old_form as used in drupal_rebuild_form()?
+* Do we need specific support for triggering elements in AJAX submissions (_form_element_triggered_scripted_submission() in Drupal 7). JavaScript could just as easily add the name and value of the emulated trigger element to the GET or POST data, so the request would look like a regular one, right?
 
 
 WHAT'S CONVERTED?

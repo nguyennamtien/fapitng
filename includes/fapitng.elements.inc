@@ -233,14 +233,7 @@ class fapitng_Form extends fapitng_FormBase {
       // Decide which button triggered form submission, if there was any.
       if ($element instanceof fapitng_FormButton)
         if (
-          // Case 1: There is no user interaction (AJAX, programmatically).
-          // The trigger can be set explicitely by setting '_trigger' to the
-          // trigger element's name attribute in the form input values.
-          isset($this->state['raw_input']['_trigger']) && $form_state['input']['_trigger'] == $element->attributes['name']
-
-          ||
-
-          // Case 2: The user clicked an image button.
+          // Case 1: The user clicked an image button.
           // When image buttons are clicked, browsers do NOT pass the form element
           // value in $_POST. Instead they pass an integer representing the
           // coordinates of the click on the button image. This means that image
@@ -250,7 +243,7 @@ class fapitng_Form extends fapitng_FormBase {
 
           ||
 
-          // Case 3: The user clicked a regular button.
+          // Case 2: The user clicked a regular button.
           // Its value appears in the raw input. This ONLY works as long as
           // $element->attributes['name'] puts the value at the top level of the
           // tree with raw input.
