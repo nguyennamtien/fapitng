@@ -29,6 +29,8 @@ WHAT'S CONVERTED?
 * Functions
   * drupal_prepare_form()
   * system_element_info()
+  * _form_button_was_clicked()
+  * _form_element_triggered_scripted_submission()
 * Caching
 * Hook_forms() has been replaced by form arguments and multiple build callbacks.
 * Hook_form_BASE_FORM_ID_alter() and hook_form_FORM_ID_alter() have been replaced by hook_form_BUILD_CALLBACK_alter().
