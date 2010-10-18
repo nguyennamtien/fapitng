@@ -24,6 +24,7 @@ THOUGHTS OF A CODING ATHEIST
 * Why should modules be able to decide where an element's title is rendered (before or after)? They shouldn't mess with output AT ALL. See #title_display.
 * Do we need $old_form as used in drupal_rebuild_form()?
 * Do we need specific support for triggering elements in AJAX submissions (_form_element_triggered_scripted_submission() in Drupal 7). JavaScript could just as easily add the name and value of the emulated trigger element to the GET or POST data, so the request would look like a regular one, right?
+* Should forms be handled programmatically at all? Form submit callbacks should call API functions, which are available to the code that wants to submit forms programmatically anyway.
 
 
 WHAT'S CONVERTED?
