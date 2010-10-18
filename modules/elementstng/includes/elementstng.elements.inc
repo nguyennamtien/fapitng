@@ -76,6 +76,15 @@ abstract class elementstng_Element {
   }
 
   /**
+   * Remove all child elements.
+   *
+   * @return NULL
+   */
+  function removeChildren() {
+    $this->children = array();
+  }
+
+  /**
    * Perform actions if the element is added to a parent.
    *
    * Empty function, because it's optional, but we don't want to check for its

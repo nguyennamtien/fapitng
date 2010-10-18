@@ -95,7 +95,7 @@ class fapitng_Form extends fapitng_FormBase {
     $this->attributes['id'] = drupal_html_id('form-' . $form_id);
     $this->build_callbacks = $build_callbacks;
     $this->build_id = drupal_hash_base64(uniqid(mt_rand(), TRUE) . mt_rand());
-    if ($_GET['q']['destination']) {
+    if (isset($_GET['destination'])) {
       $this->destination['path'] = $_GET['destination'];
     }
     $this->id = $form_id;

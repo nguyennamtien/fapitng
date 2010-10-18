@@ -8,9 +8,10 @@ TO DO
 * Validate elements with predefined options (select, radio(s) and checkbox(es))
 * Study (and implement parts of?) http://drupal.org/node/165104 and http://www.gliffy.com/pubdoc/1508856/L.png.
 * Make multi-step forms as easy to handle as possible.
-* Add flags to fapitng_Form for every handling stage to indicate if that stage has been executed.
 * Store form include files. See drupal_retrieve_form().
 * Rebuild support. Make sure there are no two builds (no caching for anonymous users).
+* Add procedural wrapper to handle forms programmatically.
+* Only execute submit callbacks for buttons if they have been clicked.
 
 
 THOUGHTS OF A CODING ATHEIST

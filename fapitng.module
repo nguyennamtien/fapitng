@@ -121,8 +121,15 @@ function fapitng_form($form_id, array $build_callbacks) {
   $form->construct();
 
   if ($form->request['submitted']) {
-    if ($form->programmed || !$form->programmed && $form->validate()) {
+    if ($form->validate()) {
       $form->submit();
+    }
+
+    if ($form->request['rebuild']) {
+      $form->removeChildren();
+      $form->construct();
+    }
+    else {
       $form->redirect();
     }
   }
