@@ -62,11 +62,8 @@ function theme_fapitng_form_label(array $variables) {
 
   $title = filter_xss_admin($element->title);
 
-  $attributes = $element->attributes;
-  $attributes['for'] = $element->attributes['id'];
-
   // The leading whitespace helps visually separate fields from inline labels.
-  return ' <label' . drupal_attributes($attributes) . '>' . $title . $required . "</label>\n";
+  return ' <label for="' . $element->attributes['id'] . '">' . $title . $required . "</label>\n";
 }
 
 /**
@@ -157,6 +154,20 @@ function theme_fapitng_form_button(array $variables) {
 // @todo We already have a class in theme_fapitng_form_element that can replace
 // this, right?
 //  $attributes['class'][] = 'form-' . $element['#button_type'];
+
+  return '<input' . drupal_attributes($attributes) . ' />';
+}
+
+/**
+ * Theme a radio button.
+ */
+function theme_fapitng_form_radio(array $variables) {
+  $element = $variables['element'];
+  $attributes = $element->attributes;
+  $attributes['type'] = 'radio';
+  if ($element->value) {
+    $attributes['checked'] = 'checked';
+  }
 
   return '<input' . drupal_attributes($attributes) . ' />';
 }

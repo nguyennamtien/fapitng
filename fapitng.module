@@ -13,6 +13,7 @@
  * @see elementstng_Element::render()
  * @see fapitng_Form::validate()
  * @see fapitng_FormBase::submit()
+ * @see fapitng_Form::redirect()
  *
  * Form handling has the following stages:
  * CONSTRUCTION
@@ -118,7 +119,9 @@ function fapitng_form($form_id, array $build_callbacks) {
   module_load_include('inc', 'fapitng', '/includes/fapitng.elements');
 
   $form = new fapitng_Form($form_id, $build_callbacks, $arguments);
+  $form->receive();
   $form->construct();
+  $form->populate();
 
   if ($form->request['submitted']) {
     if ($form->validate()) {
@@ -128,11 +131,13 @@ function fapitng_form($form_id, array $build_callbacks) {
     if ($form->request['rebuild']) {
       $form->removeChildren();
       $form->construct();
+      $form->populate();
     }
     else {
       $form->redirect();
     }
   }
+  $form->cacheSet();
 
   return $form->render();
 }

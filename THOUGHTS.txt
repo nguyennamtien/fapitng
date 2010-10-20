@@ -12,6 +12,7 @@ TO DO
 * Rebuild support. Make sure there are no two builds (no caching for anonymous users).
 * Add procedural wrapper to handle forms programmatically.
 * Only execute submit callbacks for buttons if they have been clicked.
+* Allow image buttons to submit forms.
 
 
 THOUGHTS OF A CODING ATHEIST
@@ -56,3 +57,4 @@ WHAT'S GONE?
 
 * _form_set_class()
 * element_children()
+* form_pre_render_conditional_form_element()

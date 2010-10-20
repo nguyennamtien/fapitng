@@ -31,6 +31,7 @@ abstract class fapitng_FormBase extends elementstng_Element {
  * A Drupal form.
  */
 class fapitng_Form extends fapitng_FormBase {
+  // @todo Confirm properties and their default values.
   public $action = '';
   public $ajax = array();
   // @todo This was $form_state['build_info']['args'].
@@ -41,7 +42,6 @@ class fapitng_Form extends fapitng_FormBase {
   );
   public $build_id = '';
   public $cache = FALSE;
-  public $childrenWithErrors = array();
   public $destination = array(
     'path' => NULL,
     'options' => array(),
@@ -57,26 +57,22 @@ class fapitng_Form extends fapitng_FormBase {
   // Contains properties for this specific request that must not be cached.
   public $request = array(
     // @todo Confirm properties and their default values.
-    // Public properties defined by form constructors and form handlers.
     'always_process' => NULL,
+    'buttons' => array(),
+    'complete form' => NULL,
+    'executed' => FALSE,
+    'groups' => array(),
+    'input' => NULL,
+    'invalid_elements' => array(),
     'must_validate' => NULL,
     'rebuild' => FALSE,
     'rebuild_info' => array(),
-    'temporary' => array(),
-    // Internal properties defined by form processing.
-    'buttons' => array(),
-    'executed' => FALSE,
-    'clicked_button' => NULL,
-    'complete form' => NULL,
-    'groups' => array(),
-    'input' => NULL,
-    'raw_input' => array(),
     'submit_handlers' => NULL,
     'submitted' => FALSE,
+    'temporary' => array(),
+    'raw_input' => array(),
     'trigger' => NULL,
     'validate_handlers' => NULL,
-    // References to the value properties of all input elements.
-    'values' => NULL,
   );
   // Data storage intended for use by any module that needs to store something.
   public $storage = array();
@@ -84,7 +80,6 @@ class fapitng_Form extends fapitng_FormBase {
   public $theme_wrapper_callbacks = array('fapitng_form');
   public $token = '';
   public $type = 'form';
-  public $valid = TRUE;
   public $validate_callbacks = array();
   protected $built = FALSE;
 
@@ -131,17 +126,9 @@ class fapitng_Form extends fapitng_FormBase {
   function prepare() {
     $this->addChild(new fapitng_FormHidden('form_build_id', array(
       'value' => $this->build_id,
-      'attributes' => array(
-        'id' => $this->build_id,
-        'name' => 'form_build_id',
-      ),
     )));
     $this->addChild(new fapitng_FormHidden('form_id', array(
       'value' => $this->id,
-      'attributes' => array(
-        'id' => 'form-element-' . $this->id,
-        'name' => 'form_id',
-      ),
     )));
     if ($this->token) {
       $this->addChild(new fapitng_FormHidden('form_token', array(
@@ -170,42 +157,29 @@ class fapitng_Form extends fapitng_FormBase {
    * @return NULL
    */
   function construct() {
-    $this->receive();
     if (!$this->cacheGet()) {
       $this->prepare();
       $this->build();
       $this->expand();
-      $this->populate();
-      $this->cacheSet();
     }
   }
 
   /**
    * Gather user inputted data and populate the form with it.
    *
-   * Forms can receive input in four different ways:
-   * 1) As an argument passed on to this function.
-   * 2) The form is set to accept POST and there is POST data.
-   * 3) The form is set to accept POST and there is GET data (prepopulate).
-   * 4) The form is set to accept GET and there is GET data.
-   *
-   * @param $raw_input array
-   *   An array where keys are input element names and values the elements'
-   *   values. Is an alias for changing fapitng_Form::request['raw_input']
-   *   directly.
+   * Forms can receive input in different ways:
+   * 1) The form is set to accept POST and there is POST data.
+   * 2) The form is set to accept POST and there is GET data (prepopulate).
+   * 3) The form is set to accept GET and there is GET data.
    *
    * @return NULL
    */
-  function receive(array $raw_input = array()) {
+  function receive() {
     // Input type 1.
-    if ($raw_input) {
-      $this->request['raw_input'] = $raw_input;
-    }
-    // Input type 2.
-    elseif ($this->method == 'POST' && isset($_POST['form_id']) && $_POST['form_id'] == $this->id) {
+    if ($this->method == 'POST' && isset($_POST[$this->id . '-form_id']) && $_POST[$this->id . '-form_id'] == $this->id) {
       $this->request['raw_input'] = $_POST;
     }
-    // Input types 3 and 4.
+    // Input types 2 and 3.
     else {
       $this->request['raw_input'] = $_GET;
     }
@@ -217,24 +191,11 @@ class fapitng_Form extends fapitng_FormBase {
    * @return NULL
    */
   function populate() {
-    if ($this->request['raw_input']) {
-      $this->populateElements($this->children);
-    }
-  }
-
-  function render() {
-    // Set system messages for validation errors.
-    foreach ($this->childrenWithErrors as $element) {
-      foreach ($element->errors as $error) {
-        drupal_set_message($error, 'error');
-      }
-    }
-
-    return parent::render();
+    $this->populateInputElements($this->children);
   }
 
   /**
-   * Populate the form's input elements and request data.
+   * Populate the form's input elements.
    *
    * This is a recursive function, which is called from $this::populate().
    *
@@ -243,44 +204,24 @@ class fapitng_Form extends fapitng_FormBase {
    *
    * @return NULL
    */
-  private function populateElements(array $elements) {
+  private function populateInputElements(array $elements) {
     foreach ($elements as $element) {
-      $this->populateElements($element->children);
-
-      // Decide which button triggered form submission, if there was any.
-      if ($element instanceof fapitng_FormButton)
-        if (
-          // Case 1: The user clicked an image button.
-          // When image buttons are clicked, browsers do NOT pass the form element
-          // value in $_POST. Instead they pass an integer representing the
-          // coordinates of the click on the button image. This means that image
-          // buttons MUST have unique $element->attributes['name'] values, but the
-          // details of their $_POST data should be ignored.
-          $element instanceof fapitng_FormImageButton && !empty($element->value)
-
-          ||
-
-          // Case 2: The user clicked a regular button.
-          // Its value appears in the raw input. This ONLY works as long as
-          // $element->attributes['name'] puts the value at the top level of the
-          // tree with raw input.
-          isset($this->request['raw_input'][$element->attributes['name']]) && $this->request['raw_input'][$element->attributes['name']] == $element->value
-        ) {
-        $this->request['trigger'] = $element;
-        $this->request['submitted'] = TRUE;
-      }
-
-      // Populate this element if it's an input element.
       if ($element instanceof fapitng_FormInput) {
-        if (isset($this->request['raw_input'][$element->attributes['name']])) {
-          // @todo We inject client input directly into the form. What about
-          // security issues?
-          // @todo What about #value_callback?
-          $element->value = $this->request['raw_input'][$element->attributes['name']];
-          $this->request['values'][$element->attributes['name']] = &$element->value;
-        }
+        $element->populate();
+      }
+      $this->populateInputElements($element->children);
+    }
+  }
+
+  function render() {
+    // Set system messages for validation errors.
+    foreach ($this->request['invalid_elements'] as $element) {
+      foreach ($element->errors as $error) {
+        drupal_set_message($error, 'error');
       }
     }
+
+    return parent::render();
   }
 
   /**
@@ -297,13 +238,16 @@ class fapitng_Form extends fapitng_FormBase {
         $this->errors[] = $info['message'];
       }
     }
+    if ($this->errors) {
+      $this->request['invalid_elements'][$this->id] = $this;
+    }
     $this->validateInputElements($this->children);
 
-    if (!$this->valid) {
+    if (!empty($this->request['invalid_elements'])) {
       $this->request['rebuild'] = TRUE;
+      return FALSE;
     }
-
-    return $this->valid;
+    return TRUE;
   }
 
   /**
@@ -320,7 +264,8 @@ class fapitng_Form extends fapitng_FormBase {
     foreach ($elements as $element) {
       if ($element instanceof fapitng_FormInput) {
         if (!$element->validate()) {
-          $this->valid = FALSE;
+          $this->request['valid'] = FALSE;
+          $this->request['invalid_children'][] = $element;
         }
       }
       $this->validateInputElements($element->children);
@@ -346,6 +291,8 @@ class fapitng_Form extends fapitng_FormBase {
   /**
    * Cache the form.
    *
+   * @see fapitng_FormElement::__sleep()
+   *
    * @return NULL
    */
   function cacheSet() {
@@ -354,7 +301,7 @@ class fapitng_Form extends fapitng_FormBase {
       // Don't cache the form's request data.
       $request = $this->request;
       unset($this->request);
-      cache_set($this->build_id, $this, 'fapitng_cache_form', REQUEST_TIME + 21600);
+      cache_set($this->build_id, get_object_vars($this), 'fapitng_cache_form', REQUEST_TIME + 21600);
       $this->request = $request;
     }
   }
@@ -368,14 +315,14 @@ class fapitng_Form extends fapitng_FormBase {
   function cacheGet() {
     global $user;
 
-    // @todo Fix build ID variable.
-    if (isset($this->request['raw_input']['build_id']) && $cached = cache_get($this->request['raw_input']['build_id'], 'fapitng_cache_form')) {
-      $form_cached = $cached->data;
+    if (isset($this->request['raw_input'][$this->id . '-form_build_id']) && $cached = cache_get($this->request['raw_input'][$this->id . '-form_build_id'], 'fapitng_cache_form')) {
+      $properties = $cached->data;
 
-      if ($user->uid && drupal_valid_token($form_cached->token, $this->id)) {
-        foreach ($form_cached as $property => $value) {
+      if ($user->uid && drupal_valid_token($properties['token'], $this->id)) {
+        foreach ($properties as $property => $value) {
           $this->$property = $value;
         }
+        $this->cacheGetRestoreRelations($this);
 
         // If the original form is contained in include files, load the files.
         foreach ($this->files as $file) {
@@ -395,6 +342,21 @@ class fapitng_Form extends fapitng_FormBase {
     }
     return FALSE;
   }
+
+  /**
+   * Restore relations between the form and child elements after getting a form
+   * from the cache.
+   *
+   * @param $parent fapitng_FormBase
+   *   A form or a form element whose children to restore the relations for.
+   */
+  private function cacheGetRestoreRelations(fapitng_FormBase $parent) {
+    foreach ($parent->children as $element) {
+      $element->form = $this;
+      $element->form = $parent;
+      $this->cacheGetRestoreRelations($element);
+    }
+  }
 }
 
 /**
@@ -409,12 +371,18 @@ class fapitng_FormElement extends fapitng_FormBase {
   public $suffix = '';
   public $theme_wrapper_callbacks = array('fapitng_form_element');
   public $tree = FALSE;
+  // @todo Are these wrapper properties going to be used?
   public $wrapper_prefix = '';
   public $wrapper_suffix = '';
-  protected $printed = FALSE;
 
   function __construct($id, array $properties = array()) {
     parent::__construct($id, $properties);
+  }
+
+  function __sleep() {
+    // Unset (possible) references to the form, because the form object will no
+    // longer exist after caching.
+    return array_diff(array_keys(get_object_vars($this)), array('form', 'parent'));
   }
 
   function settle() {
@@ -432,10 +400,6 @@ class fapitng_FormElement extends fapitng_FormBase {
  * Base class for all form elements that accept input.
  */
 class fapitng_FormInput extends fapitng_FormElement {
-  public $attributes = array(
-    'name' => '',
-  );
-  public $default_value = NULL;
   public $disabled = FALSE;
   public $errors = array();
   public $expand_callbacks = array('fapitng_form_expand_input', 'fapitng_form_expand_required');
@@ -445,7 +409,33 @@ class fapitng_FormInput extends fapitng_FormElement {
 
   function __construct($id, array $properties = array()) {
     parent::__construct($id, $properties);
+    $this->attributes['name'] = '';
     $this->attributes['value'] = '';
+  }
+
+  /**
+   * Set the value of this input element.
+   *
+   * By default calling this method equals setting $this->value directly.
+   * Subclasses can however implement their own value() method to perform extra
+   * actions. This is particularly useful for elements that exist of multiple
+   * child elements that need to have their value set as soon as the parent's
+   * value is set.
+   *
+   * @param $value mixed
+   *   The value to give to $this->value.
+   *
+   * @return NULL
+   */
+  function populate() {
+    // @todo We inject client input directly into the form. What about
+    // security issues?
+    if (isset($this->form->request['raw_input'][$this->attributes['name']])) {
+      // Disabled input elements do not accept new input.
+      if (!$this->disabled) {
+        $this->value = $this->form->request['raw_input'][$this->attributes['name']];
+      }
+    }
   }
 
   /**
@@ -461,7 +451,7 @@ class fapitng_FormInput extends fapitng_FormElement {
       );
       if (!call_user_func_array($callback, array_merge(array($this->value), $info['arguments']))) {
         $this->errors[] = $info['message'];
-        $this->form->childrenWithErrors[] = $this;
+        $this->form->request['invalid_elements'][$this->id] = $this;
       }
     }
 
@@ -566,8 +556,6 @@ class fapitng_FormTableselect extends fapitng_FormInput {
 }
 
 class fapitng_FormButton extends fapitng_FormInput {
-  // @todo Implement $execute_submit_handler.
-  public $execute_submit_handler = FALSE;
   // @todo Implement $limit_validation ($limit_validation_errors in Drupal 7).
   public $limit_validation = array();
   public $return_value = '';
@@ -576,8 +564,15 @@ class fapitng_FormButton extends fapitng_FormInput {
 }
 
 class fapitng_FormSubmit extends fapitng_FormButton {
-  public $execute_submit_handler = TRUE;
   public $type = 'submit';
+
+  function populate() {
+    parent::populate();
+    if (isset($this->form->request['raw_input'][$this->attributes['name']]) && $this->form->request['raw_input'][$this->attributes['name']] == $this->value) {
+      $this->form->request['trigger'] = $this;
+      $this->form->request['submitted'] = TRUE;
+    }
+  }
 }
 
 class fapitng_FormImageButton extends fapitng_FormButton {
@@ -638,13 +633,13 @@ class fapitng_FormRadio extends fapitng_FormInput {
 class fapitng_FormRadios extends fapitng_FormInput {
   public $expand_callbacks = array('fapitng_form_expand_radios');
   public $options = array();
-  // @ todo Implement pre render callback.
-  public $pre_render_callbacks = array('form_pre_render_conditional_form_element');
   public $type = 'radios';
 
-  function __construct($id, array $properties = array()) {
-    parent::__construct($id, $properties);
-    array_unshift($this->theme_wrapper_callbacks, 'fapitng_form_radios');
+  function populate() {
+    parent::populate();
+    foreach ($this->children as $element) {
+      $element->value = $element->attributes['value'] == $this->value;
+    }
   }
 }
 
@@ -657,8 +652,6 @@ class fapitng_FormCheckbox extends fapitng_FormInput {
 class fapitng_FormCheckboxes extends fapitng_FormInput {
   public $expand_callbacks = array('fapitng_form_expand_checkboxes');
   public $options = array();
-  // @ todo Implement pre render callback.
-  public $pre_render_callbacks = array('form_pre_render_conditional_form_element');
   public $type = 'checkboxes';
 
   function __construct($id, array $properties = array()) {
@@ -728,6 +721,13 @@ function fapitng_form_expand_required(fapitng_FormInput $element) {
   }
 }
 
+function fapitng_form_expand_options(fapitng_FormInput $element) {
+  $element->validate_callbacks['in_array'] = array(
+    'message' => t('%title has a value that does not appear in its available options.', array('%title' => $element->title)),
+    'arguments' => $element->options,
+  );
+}
+
 function fapitng_form_expand_textarea(fapitng_FormTextarea $element) {
   if ($element->resizable) {
     $element->attached['js']['misc/textarea.js'] = array(
@@ -762,5 +762,21 @@ function fapitng_form_expand_text_input(fapitng_FormTextInput $element) {
 function fapitng_form_expand_textfield(fapitng_FormTextfield $element) {
   if ($element->max_length) {
     $element->attributes['class']['maxlength'] = $element->max_length;
+  }
+}
+
+function fapitng_form_expand_radios(fapitng_FormRadios $element) {
+  foreach ($element->options as $key => $value) {
+    $radio = new fapitng_FormRadio($key, array(
+      'title' => $value,
+      // Radios handle boolean values.
+      'value' => $element->value == $key,
+    ));
+    $radio->attributes['name'] = $element->attributes['name'];
+    // Although radios handle boolean values, HTML forms don't work that way.
+    // Set the value attribute to make the radio submit a unique value which we
+    // can convert to a boolean.
+    $radio->attributes['value'] = $key;
+    $element->addChild($radio);
   }
 }
