@@ -4,7 +4,7 @@
 /**
  * Basic behavior shared by forms and form elements.
  */
-abstract class fapitng_FormBase extends elementstng_Element {
+abstract class fapitng_FormBase extends elementstng_RenderableElement {
   public $attached = array();
   public $build_callbacks = array();
   public $submit_callbacks = array();
@@ -370,7 +370,6 @@ class fapitng_Form extends fapitng_FormBase {
 class fapitng_FormElement extends fapitng_FormBase {
   public $access = TRUE;
   public $form = NULL;
-  public $parent = NULL;
   public $prefix = '';
   public $states = array();
   public $suffix = '';

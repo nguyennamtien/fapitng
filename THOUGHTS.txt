@@ -12,6 +12,7 @@ TO DO
 * Add procedural wrapper to handle forms programmatically.
 * Only execute submit callbacks for buttons if they have been clicked.
 * Allow image buttons to submit forms.
+* Convert form_options_flatten()?
 
 
 THOUGHTS OF A CODING ATHEIST
@@ -25,6 +26,7 @@ THOUGHTS OF A CODING ATHEIST
 * Do we need $old_form as used in drupal_rebuild_form()?
 * Do we need specific support for triggering elements in AJAX submissions (_form_element_triggered_scripted_submission() in Drupal 7). JavaScript could just as easily add the name and value of the emulated trigger element to the GET or POST data, so the request would look like a regular one, right?
 * Should forms be handled programmatically at all? Form submit callbacks should call API functions, which are available to the code that wants to submit forms programmatically anyway.
+* Now elements are objects, can expand callbacks be replaced by object constructors?
 
 
 WHAT'S CONVERTED?
@@ -57,3 +59,8 @@ WHAT'S GONE?
 * _form_set_class()
 * element_children()
 * form_pre_render_conditional_form_element()
+* form_state_keys_no_cache()
+* form_state_defaults()
+* form_state_values_clean()
+* form_error()
+* form_set_error()
