@@ -34,9 +34,9 @@
  *   This is the first layer with form logic to expand the form's
  *   functionality, i.e. convert a password confirm element to two separate
  *   fields with extra validation.
- * )
  * - Populate
  *   Fill input elements and request data with client input.
+ *
  * - Cache set
  *   Cache the constructed form.
  * USER INTERACTION (Optional. These stages are skipped when submitting a form
@@ -121,7 +121,6 @@ function fapitng_form($form_id, array $build_callbacks) {
   $form = new fapitng_Form($form_id, $build_callbacks, $arguments);
   $form->receive();
   $form->construct();
-  $form->populate();
 
   if ($form->request['submitted']) {
     if ($form->validate()) {
@@ -131,7 +130,6 @@ function fapitng_form($form_id, array $build_callbacks) {
     if ($form->request['rebuild']) {
       $form->removeChildren();
       $form->construct();
-      $form->populate();
     }
     else {
       $form->redirect();

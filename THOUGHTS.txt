@@ -9,7 +9,6 @@ TO DO
 * Study (and implement parts of?) http://drupal.org/node/165104 and http://www.gliffy.com/pubdoc/1508856/L.png.
 * Make multi-step forms as easy to handle as possible.
 * Store form include files. See drupal_retrieve_form().
-* Rebuild support. Make sure there are no two builds (no caching for anonymous users).
 * Add procedural wrapper to handle forms programmatically.
 * Only execute submit callbacks for buttons if they have been clicked.
 * Allow image buttons to submit forms.
@@ -41,7 +40,7 @@ WHAT'S CONVERTED?
 * Hook_forms() has been replaced by form arguments and multiple build callbacks.
 * Hook_form_BASE_FORM_ID_alter() and hook_form_FORM_ID_alter() have been replaced by hook_form_BUILD_CALLBACK_alter().
 * #process has been replaced by the 'expand' property.
-* #tree and #parents have been replaced by fapitng_FormElement::parent, which is a reference to the parent element or form.
+* #tree and #parents have been replaced by fapitng_FormElement::parent, which is a reference to the parent element.
 * fapitng_Form now contains all properties from $form_state, except those defined in form_state_keys_no_cache(), which are located in fapitng_Form::request. Those properties are to be used for a single page request only.
 
 

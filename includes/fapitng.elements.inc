@@ -52,6 +52,7 @@ class fapitng_Form extends fapitng_FormBase {
   // @todo This was $form_state['build_info']['files'].
   public $files = array();
   public $method = 'POST';
+  public $no_cache = FALSE;
   public $programmed = FALSE;
   public $rebuild = FALSE;
   // Contains properties for this specific request that must not be cached.
@@ -161,6 +162,7 @@ class fapitng_Form extends fapitng_FormBase {
       $this->prepare();
       $this->build();
       $this->expand();
+      $this->populate();
     }
   }
 
@@ -187,6 +189,9 @@ class fapitng_Form extends fapitng_FormBase {
 
   /**
    * Populate the form's input elements and request data.
+   *
+   * Population needs to be performed *after* the construction stage, so
+   * elements can populate their children, which have been created later.
    *
    * @return NULL
    */
@@ -296,8 +301,8 @@ class fapitng_Form extends fapitng_FormBase {
    * @return NULL
    */
   function cacheSet() {
-    // @todo Do we need a #cache_token?
-    if ($this->token) {
+    // @todo Do we need a #cache_token next to the regular token?
+    if ($this->token && $this->cache && !$this->no_cache) {
       // Don't cache the form's request data.
       $request = $this->request;
       unset($this->request);
