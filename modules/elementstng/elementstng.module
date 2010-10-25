@@ -32,3 +32,22 @@ function elementstng_theme() {
 function elementstng() {
   module_load_include('inc', 'elementstng', '/includes/elementstng.elements');
 }
+
+/**
+ * Get new or overriden properties for elements.
+ *
+ * @param $type string
+ *   The machine-readable name of the element to get properties for.
+ *
+ * @return array
+ *   Keys and values are property names and values.
+ */
+function elementstng_element_properties($type) {
+  static $info = NULL;
+
+  if (is_null($info)) {
+    $info = module_invoke_all('elementstng_element_properties');
+  }
+
+  return isset($info[$type]) ? $info[$type] : array();
+}

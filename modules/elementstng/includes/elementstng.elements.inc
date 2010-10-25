@@ -15,8 +15,11 @@ abstract class elementstng_Element {
 
   function __construct($id, array $properties = array()) {
     $this->id = $id;
+    // Add properties from hook_elementstng_element_properties()
+    // implementations.
+    $properties = array_merge($properties, elementstng_element_properties($this->type));
     foreach ($properties as $property => $value) {
-      if (is_array($value)) {
+      if (is_array($this->$property)) {
         $this->$property = array_merge($this->$property, $value);
       }
       else {

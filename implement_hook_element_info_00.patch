@@ -1,0 +1,67 @@
+diff --git a/modules/elementstng/elementstng.api.php b/modules/elementstng/elementstng.api.php
+index 60c74e3..e6cc644 100644
+--- a/modules/elementstng/elementstng.api.php
++++ b/modules/elementstng/elementstng.api.php
+@@ -2,23 +2,12 @@
+ // $Id$
+ 
+ /**
+- * Define renderable elements.
+- *
+- * Even though the basic implementation only requires a machine name and a
+- * class, a format has been chosen to allow other modules to extend the
+- * information by adding other properties, like titles, as you can see in
+- * hook_elementstng_element_info_alter();
++ * Add properties to elements or override existing ones.
+  */
+-function hook_elementstng_element_info() {
+-  $elements['form'] = array(
+-    'class' => 'fapitng_Form'
++function hook_elementstng_element_info_alter() {
++  $properties['form'] = array(
++    'submit_callbacks' => array('foo_custom_submit_callback')
+   );
+-  $elements['markup'] = array(
+-    'class' => 'elementstng_Markup'
+-  );
+-}
+ 
+-function hook_elementstng_element_info_alter(array &$elements) {
+-  $elements['markup']['class'] = 'foobar_Markup';
+-  $elements['markup']['title'] = t('Markup');
++  return $properties;
+ }
+\ No newline at end of file
+diff --git a/modules/elementstng/elementstng.module b/modules/elementstng/elementstng.module
+index d4ea0ce..0256659 100644
+--- a/modules/elementstng/elementstng.module
++++ b/modules/elementstng/elementstng.module
+@@ -31,4 +31,14 @@ function elementstng_theme() {
+  */
+ function elementstng() {
+   module_load_include('inc', 'elementstng', '/includes/elementstng.elements');
++}
++
++function element_info($type) {
++  static $info = NULL;
++
++  if (!$info) {
++    $info = module_invoke_all('element_info_alter');
++  }
++
++  return $info[$type];
+ }
+\ No newline at end of file
+diff --git a/modules/elementstng/includes/elementstng.elements.inc b/modules/elementstng/includes/elementstng.elements.inc
+index ce99b0b..a262658 100644
+--- a/modules/elementstng/includes/elementstng.elements.inc
++++ b/modules/elementstng/includes/elementstng.elements.inc
+@@ -14,6 +14,8 @@ abstract class elementstng_Element {
+   protected $children = array();
+ 
+   function __construct($id, array $properties = array()) {
++    // @todo Merge in defaults from element_info();
++
+     $this->id = $id;
+     foreach ($properties as $property => $value) {
+       if (is_array($value)) {

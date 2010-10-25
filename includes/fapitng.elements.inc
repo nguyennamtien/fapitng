@@ -87,6 +87,8 @@ class fapitng_Form extends fapitng_FormBase {
   function __construct($form_id, array $build_callbacks, array $arguments = array(), $programmed = FALSE) {
     global $user;
 
+    parent::__construct($form_id);
+
     $this->action = request_uri();
     $this->attributes['id'] = drupal_html_id('form-' . $form_id);
     $this->build_callbacks = $build_callbacks;
