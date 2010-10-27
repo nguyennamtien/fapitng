@@ -494,7 +494,7 @@ class fapitng_FormVerticalTabs extends fapitng_FormElement {
 /**
  * Base class for elements that accept text input.
  */
-class fapitng_FormTextInput extends fapitng_FormInput {
+abstract class fapitng_FormTextInput extends fapitng_FormInput {
   public $max_length = 0;
   public $min_length = 0;
 
@@ -504,20 +504,20 @@ class fapitng_FormTextInput extends fapitng_FormInput {
   }
 }
 
-class fapitng_FormTextField extends fapitng_FormTextInput {
+class fapitng_FormText extends fapitng_FormTextInput {
   public $autocomplete_path = '';
   public $max_length = 128;
-  public $theme_callback = 'fapitng_form_textfield';
+  public $theme_callback = 'fapitng_form_text';
   public $type = 'text';
 
   function __construct($id, array $properties = array()) {
     parent::__construct($id, $properties);
-    $this->expand_callbacks[] = 'fapitng_form_expand_textfield';
+    $this->expand_callbacks[] = 'fapitng_form_expand_text';
     $this->attributes['size'] = 60;
   }
 }
 
-class fapitng_FormPassword extends fapitng_FormTextField {
+class fapitng_FormPassword extends fapitng_FormText {
   public $type = 'password';
 }
 
@@ -562,6 +562,8 @@ class fapitng_FormTableselect extends fapitng_FormInput {
 }
 
 class fapitng_FormButton extends fapitng_FormInput {
+  // Regular buttons do not trigger form submissions without JavaScript, so
+  // hide if there is no JavaScript support.
   // @todo Implement $limit_validation ($limit_validation_errors in Drupal 7).
   public $limit_validation = array();
   public $return_value = '';
@@ -618,15 +620,42 @@ class fapitng_FormWeight extends fapitng_FormSelect {
   }
 }
 
-class fapitng_FormDate extends fapitng_FormInput {
-  // @todo Do we need a theme callback for this element?
-  public $theme_callback = 'fapitng_form_date';
+/**
+ * A date picker.
+ *
+ * @todo Can we support more calendars than the Gregorian?
+ * @todo Add support for BCE.
+ */
+class fapitng_FormDate extends fapitng_FormText {
+  public $max_length = 10;
   public $type = 'date';
 
   function __construct($id, array $properties = array()) {
+    // First set the description, then call the parent constructor, so it can
+    // be overridden manually.
+    $this->description = t('Use the format YYYY-MM-DD.');
     parent::__construct($id, $properties);
-    // @todo Replace form_process_date().
-      $this->expand_callbacks[] = 'fapitng_form_expand_date';
+    $this->expand_callbacks[] = 'fapitng_form_expand_date';
+    $this->attributes['size'] = 10;
+  }
+}
+
+/**
+ * A time picker.
+ *
+ * @todo Add support for 12-hour notations.
+ */
+class fapitng_FormTime extends fapitng_FormText {
+  public $max_length = 8;
+  public $type = 'time';
+
+  function __construct($id, array $properties = array()) {
+    // First set the description, then call the parent constructor, so it can
+    // be overridden manually.
+    $this->description = t('Use the format HH:MM:SS.');
+    parent::__construct($id, $properties);
+    $this->expand_callbacks[] = 'fapitng_form_expand_time';
+    $this->attributes['size'] = 8;
   }
 }
 
@@ -765,9 +794,9 @@ function fapitng_form_expand_text_input(fapitng_FormTextInput $element) {
   }
 }
 
-function fapitng_form_expand_textfield(fapitng_FormTextfield $element) {
+function fapitng_form_expand_text(fapitng_FormText $element) {
   if ($element->max_length) {
-    $element->attributes['class']['maxlength'] = $element->max_length;
+    $element->attributes['maxlength'] = $element->max_length;
   }
 }
 
@@ -785,4 +814,16 @@ function fapitng_form_expand_radios(fapitng_FormRadios $element) {
     $radio->attributes['value'] = $key;
     $element->addChild($radio);
   }
+}
+
+function fapitng_form_expand_date(elementstng_Element $element) {
+    $element->validate_callbacks['fapitng_valid_iso8601_date'] = array(
+      'message' => t('%title must be of the format YYYY-MM-DD.', array('%title' => $element->title)),
+    );
+}
+
+function fapitng_form_expand_time(elementstng_Element $element) {
+    $element->validate_callbacks['fapitng_valid_iso8601_time'] = array(
+      'message' => t('%title must be of the format HH:MM:SS.', array('%title' => $element->title)),
+    );
 }

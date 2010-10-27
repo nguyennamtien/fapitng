@@ -160,11 +160,13 @@ abstract class elementstng_Element {
    * @return NULL
    */
   function expand() {
-    foreach ($this->children as $element) {
-      $element->expand();
-    }
+    // First expand the element itself, to ensure dynamically added child
+    // elements will also be expanded.
     foreach ($this->expand_callbacks as $callback) {
       call_user_func($callback, $this);
+    }
+    foreach ($this->children as $element) {
+      $element->expand();
     }
   }
 }
@@ -173,7 +175,7 @@ abstract class elementstng_Element {
  * Allow basic elements to be rendered.
  */
 abstract class elementstng_RenderableElement extends elementstng_Element {
-  // @todo Add process callback for AJAX settings.
+  // @todo Add expand callback for AJAX settings.
   public $ajax = array();
   public $attributes = array();
   public $description = '';

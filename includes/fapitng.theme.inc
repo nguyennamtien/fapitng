@@ -101,9 +101,9 @@ function theme_fapitng_form_textarea(array $variables) {
 }
 
 /**
- * Theme a textfield or a password input.
+ * Theme a text or password input.
  */
-function theme_fapitng_form_textfield(array $variables) {
+function theme_fapitng_form_text(array $variables) {
   $element = $variables['element'];
   $element_attributes = array_merge($element->attributes, array(
     'type' => $element->type,

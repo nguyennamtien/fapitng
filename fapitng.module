@@ -75,7 +75,7 @@ function fapitng_theme() {
     'required_marker',
     'fieldset',
     'vertical_tabs',
-    'textfield',
+    'text',
     'textarea',
     'tableselect',
     'button',
@@ -105,14 +105,19 @@ function fapitng_theme() {
  * @param $form_id string
  *   The identifier for this form. Does not necessarily equal the HTML ID.
  * @param $build_callbacks array
- *   The names of the form builder functions.
+ *   The names of the form builder functions. If none are given, the form ID is
+ *   used as the only function to build the form.
  * @param ...
  *   Additional arguments to pass on to the build callbacks.
  *
  * @return string
  */
-function fapitng_form($form_id, array $build_callbacks) {
+function fapitng_form($form_id, array $build_callbacks = array()) {
   $arguments = array_slice(func_get_args(), 2);
+
+  if (empty($build_callbacks)) {
+    $build_callbacks[] = $form_id;
+  }
 
   // @todo Remove when moving to core.
   elementstng();
