@@ -99,6 +99,60 @@ abstract class elementstng_Element {
   }
 
   /**
+   * Add a sibling element before this one.
+   *
+   * @param $element elementstng_Element
+   *   The new child element.
+   * @param $offset integer
+   *   The amount of other elements to keep between $element and this one.
+   *
+   * @return NULL
+   */
+  function addSiblingBefore(elementstng_Element $element, $offset = 0) {
+    $this->addSibling($element, $before_name, $offset * -1);
+  }
+
+  /**
+   * Add a sibling element after this one.
+   *
+   * @param $element elementstng_Element
+   *   The new child element.
+   * @param $offset integer
+   *   The amount of other elements to keep between $element and this one.
+   *
+   * @return NULL
+   */
+  function addSiblingAfter(elementstng_Element $element, $offset = 0) {
+    $this->addChildPositioned($element, $after_name, $offset);
+  }
+
+  /**
+   * Add a sibling element relative to this element's position.
+   *
+   * @param $element elementstng_Element
+   *   The new child element.
+   * @param $offset integer
+   *   The amount of other elements to keep between $element and this one. Use
+   *   negative values to add before instead of after.
+   *
+   * @return NULL
+   */
+  function addSibling(elementstng_Element $element, $offset) {
+    foreach (array_keys($this->children) as $name) {
+      if ($name == $this->id) {
+        break;
+      }
+      $offset++;
+    }
+    // Chop off the elements after $element's designated position.
+    $end = array_slice($this->parent->children, $offset, 0, TRUE);
+    // Keep the elements before $element's designated position.
+    $this->parent->children = array_slice($this->parent->children, 0, $offset, TRUE);
+    $this->parent->addChild($element);
+    $this->parent->children = array_merge($this->parent->children, $end);
+  }
+
+  /**
    * Get a particular sibling element.
    *
    * @return elementstng_Element
